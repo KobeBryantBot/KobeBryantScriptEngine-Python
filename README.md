@@ -1,2 +1,2 @@
-# KobeBryant-Plugin-Template
-Native plugin template for KobeBryant
+# KobeBryantScriptEngine
+A cross language script engine designed for KobeBryant to run node.js and python plugins.
