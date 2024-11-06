@@ -1,9 +1,6 @@
 #include "Version.hpp"
-#include "api/Logger.hpp"
 #include "api/plugin/PluginEngineRegistry.hpp"
 #include "core/PythonPluginEngine.hpp"
-
-Logger logger("KobeBryantScriptEngine-Python");
 
 // 此处写插件加载时执行的操作
 void onEnable() {

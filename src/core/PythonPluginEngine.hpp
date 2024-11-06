@@ -1,12 +1,13 @@
 #include "Python/Python.h"
+#include "api/Logger.hpp"
 #include "api/plugin/IPluginEngine.hpp"
 #include <unordered_map>
 
 class PythonPluginEngine : public IPluginEngine {
 private:
-    PyObject*                                    mSystemPath;
-    std::unordered_map<std::string, PyObject*>   mPluginsHandle;
-    std::unordered_map<std::string, std::string> mPluginsMoudleName;
+    PyObject*                                  mSystemPath;
+    std::unordered_map<std::string, PyObject*> mPluginsHandle;
+    Logger                                     mLogger{"KobeBryantScriptEngine-Python"};
 
 public:
     PythonPluginEngine();
@@ -18,4 +19,6 @@ public:
     bool loadPlugin(std::string const& plugin, std::filesystem::path const& entry) override;
 
     bool unloadPlugin(std::string const& plugin) override;
+
+    Logger& getLogger();
 };
