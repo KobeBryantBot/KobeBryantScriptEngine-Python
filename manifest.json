@@ -1,0 +1,5 @@
+{
+    "name": "{PluginName}",
+    "entry": "{PluginName}.dll",
+    "type": "native"
+}
