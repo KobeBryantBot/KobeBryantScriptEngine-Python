@@ -1,10 +1,14 @@
+#include "Version.hpp"
 #include "api/Logger.hpp"
+#include "api/plugin/PluginEngineRegistry.hpp"
+#include "core/PythonPluginEngine.hpp"
 
-Logger logger("KobeBryant-Plugin-Template");
+Logger logger("KobeBryantScriptEngine-Python");
 
 // 此处写插件加载时执行的操作
 void onEnable() {
-    // 运行插件
+    // 注册Python引擎
+    PluginEngineRegistry::registerPluginEngine<PythonPluginEngine>();
 }
 
 // 此处写插件卸载载时执行的操作
