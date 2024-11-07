@@ -13,10 +13,6 @@ private:
     std::unordered_map<std::string, std::string> mPluginsMap;
 
 public:
-    PythonPluginEngine();
-
-    ~PythonPluginEngine() override;
-
     std::string getPluginType() const override;
 
     bool loadPlugin(std::string const& plugin, std::filesystem::path const& entry) override;

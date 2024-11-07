@@ -2,10 +2,6 @@
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/StringUtils.hpp"
 
-PythonPluginEngine::PythonPluginEngine() : IPluginEngine() { Logger().warn("construct"); }
-
-PythonPluginEngine::~PythonPluginEngine() { Logger().warn("destruct"); }
-
 std::string PythonPluginEngine::getPluginType() const { return "script-python"; }
 
 bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::path const& entry) {
