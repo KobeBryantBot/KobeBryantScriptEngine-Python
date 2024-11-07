@@ -8,9 +8,9 @@ namespace py = pybind11;
 
 class PythonPluginEngine : public IPluginEngine {
 private:
-    Logger                 mLogger{"KobeBryantScriptEngine-Python"};
-    py::scoped_interpreter mGILGuard{};
-    py::dict               mGlobalNamespace = py::globals();
+    Logger                                       mLogger{"KobeBryantScriptEngine-Python"};
+    py::scoped_interpreter                       mGILGuard{};
+    std::unordered_map<std::string, std::string> mPluginsMap;
 
 public:
     PythonPluginEngine();
