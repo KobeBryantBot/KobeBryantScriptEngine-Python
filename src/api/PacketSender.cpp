@@ -13,7 +13,7 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .def("at", &Message::at)
         .def("reply", &Message::reply)
         .def("face", &Message::face)
-        .def("text", (Message & (Message::*)(const std::string&)) & Message::text, py::arg("text"))
+        .def("text", (Message & (Message::*)(const std::string&)) & Message::text)
         .def(
             "image",
             py::overload_cast<std::string const&, Message::ImageType, std::optional<std::string>>(&Message::image)
