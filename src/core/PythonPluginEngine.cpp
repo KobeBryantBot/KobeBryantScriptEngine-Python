@@ -1,5 +1,6 @@
 #include "PythonPluginEngine.hpp"
 #include "api/utils/StringUtils.hpp"
+#include "Python.h"
 
 PythonPluginEngine::PythonPluginEngine() : IPluginEngine() {}
 
@@ -28,7 +29,7 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
             fclose(file);
             if (ret == 0) {
                 getLogger().info("已成功加载Python插件 {}", plugin);
-                
+
                 Py_Finalize();
                 return true;
             } else {

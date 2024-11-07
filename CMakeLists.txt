@@ -21,6 +21,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/sdk/include)
 include_directories(${PROJECT_SOURCE_DIR}/sdk/include/third)
 include_directories(${PROJECT_SOURCE_DIR}/third/include)
+include_directories(${PROJECT_SOURCE_DIR}/third/include/Python)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 

@@ -1,4 +1,3 @@
-#include "Python/Python.h"
 #include "api/Logger.hpp"
 #include "api/plugin/IPluginEngine.hpp"
 #include <unordered_map>
