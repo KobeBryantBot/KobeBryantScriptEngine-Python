@@ -5,9 +5,7 @@
 
 class PythonPluginEngine : public IPluginEngine {
 private:
-    PyObject*                                  mSystemPath;
-    std::unordered_map<std::string, PyObject*> mPluginsHandle;
-    Logger                                     mLogger{"KobeBryantScriptEngine-Python"};
+    Logger mLogger{"KobeBryantScriptEngine-Python"};
 
 public:
     PythonPluginEngine();
