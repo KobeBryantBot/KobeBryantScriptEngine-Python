@@ -21,6 +21,14 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
             py::arg() = Message::ImageType::Path,
             py::arg() = std::nullopt
         )
+        .def(
+            "avatar",
+            py::overload_cast<int64_t, uint16_t, bool>(&Message::avatar),
+            py::arg(),
+            py::arg() = 640,
+            py::arg() = false
+        )
+        .def("avatar", py::overload_cast<int64_t, bool>(&Message::avatar))
         .def("record", &Message::record)
         .def("video", &Message::video)
         .def("rps", &Message::rps)
@@ -33,6 +41,7 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .value("Path", Message::ImageType::Path)
         .value("Binary", Message::ImageType::Binary)
         .value("Url", Message::ImageType::Url)
+        .value("Base64", Message::ImageType::Base64)
         .export_values();
 
     py::enum_<RequestSubType>(m, "RequestSubType")
