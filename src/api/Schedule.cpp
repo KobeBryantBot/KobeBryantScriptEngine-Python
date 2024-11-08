@@ -10,15 +10,15 @@ namespace py = pybind11;
 class ScriptSchedule {
 public:
     static size_t addDelayTask(int delay, std::function<void()> func) {
-        return Schedule::addDelayTask(std::chrono::seconds(delay), std::move(func));
+        return Schedule::addDelayTask(std::chrono::seconds(delay), func);
     }
 
     static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately) {
-        return Schedule::addRepeatTask(std::chrono::seconds(delay), std::move(func), immediately);
+        return Schedule::addRepeatTask(std::chrono::seconds(delay), func, immediately);
     }
 
     static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately, uint64_t times) {
-        return Schedule::addRepeatTask(std::chrono::seconds(delay), std::move(func), immediately, times);
+        return Schedule::addRepeatTask(std::chrono::seconds(delay), func, immediately, times);
     }
 
     static bool cancelTask(size_t id) { return Schedule::cancelTask(id); }
