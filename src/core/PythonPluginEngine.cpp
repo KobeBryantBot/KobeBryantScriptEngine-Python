@@ -2,12 +2,18 @@
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/StringUtils.hpp"
 
+std::unique_ptr<py::gil_scoped_release> release = nullptr;
+
 PythonPluginEngine::PythonPluginEngine() : IPluginEngine() {
-    static std::unique_ptr<py::gil_scoped_release> release;
     if (!release) {
         release = std::make_unique<py::gil_scoped_release>();
     }
 };
+
+PythonPluginEngine::~PythonPluginEngine() {
+    release.reset();
+    release = nullptr;
+}
 
 std::string PythonPluginEngine::getPluginType() const { return "script-python"; }
 
@@ -31,10 +37,11 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
         utils::ReplaceStr(moduleName, "./", "");
         utils::ReplaceStr(moduleName, "/", ".");
         // 导入模块并启用
-        auto plugin_module = py::module::import(moduleName.c_str());
-        plugin_module.attr("on_enable")();
+        py::object pluginModule = py::module::import(moduleName.c_str());
+        pluginModule.attr("on_enable")();
         // 缓存此模块
-        mPluginModules[plugin] = std::move(plugin_module);
+        mPluginModules["Test"] = std::move(pluginModule);
+        sys_path.attr("remove")(py::str(entry.parent_path().string()));
         getLogger().info("已成功加载Python插件 {}", plugin);
         return true;
     } catch (const std::exception& e) {
@@ -46,30 +53,8 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
 }
 
 bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
-    try {
-        if (mPluginModules.contains(plugin)) {
-            getLogger().warn("尝试卸载");
-            mPluginModules[plugin].attr("on_enable")();
-            //mPluginModules.erase(plugin);
-        }
-    } catch (const std::exception& e) {
-        getLogger().error("卸载Python插件 {} 时捕获到异常:\n {}", plugin, e.what());
-    } catch (...) {
-        getLogger().error("卸载Python插件 {} 时出现未知异常", plugin);
-    }
+    // TODO: 完成卸载
     return false;
-    /*
-    if (mPluginsMap.contains(plugin)) {
-        auto        moduleName = mPluginsMap[plugin];
-        py::module_ sys        = py::module_::import("sys");
-        py::dict    modules    = sys.attr("modules");
-        if (modules.contains(moduleName)) {
-            modules[moduleName.c_str()] = py::none();
-            mPluginsMap.erase(plugin);
-            return true;
-        }
-    }
-    */
 }
 
 Logger& PythonPluginEngine::getLogger() { return mLogger; }

@@ -11,10 +11,12 @@ class PythonPluginEngine : public IPluginEngine {
 private:
     Logger                                      mLogger{"KobeBryantScriptEngine-Python"};
     py::scoped_interpreter                      mGuard{};
-    std::unordered_map<std::string, py::module> mPluginModules;
+    std::unordered_map<std::string, py::object> mPluginModules;
 
 public:
     PythonPluginEngine();
+
+    ~PythonPluginEngine() override;
 
     std::string getPluginType() const override;
 
