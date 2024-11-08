@@ -2,7 +2,8 @@
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/StringUtils.hpp"
 
-std::unique_ptr<py::gil_scoped_release> release = nullptr;
+// 必须释放全局 GIL 锁
+static std::unique_ptr<py::gil_scoped_release> release = nullptr;
 
 PythonPluginEngine::PythonPluginEngine() : IPluginEngine() {
     if (!release) {
