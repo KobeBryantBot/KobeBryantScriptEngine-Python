@@ -54,6 +54,7 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
 
 bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
     // TODO: 完成卸载
+    getLogger().warn("卸载Python插件的功能尚未完成！");
     return false;
 }
 
