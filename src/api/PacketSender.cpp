@@ -16,7 +16,10 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .def("text", (Message & (Message::*)(const std::string&)) & Message::text)
         .def(
             "image",
-            py::overload_cast<std::string const&, Message::ImageType, std::optional<std::string>>(&Message::image)
+            py::overload_cast<std::string const&, Message::ImageType, std::optional<std::string>>(&Message::image),
+            py::arg(),
+            py::arg() = Message::ImageType::Path,
+            py::arg() = std::nullopt
         )
         .def("record", &Message::record)
         .def("video", &Message::video)
@@ -38,10 +41,7 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .export_values();
 
     py::class_<PacketSender>(m, "PacketSender")
-        .def_static(
-            "getInstance",
-            [] { return std::unique_ptr<PacketSender, py::nodelete>(&PacketSender::getInstance()); }
-        )
+        .def_static("getInstance", &PacketSender::getInstance, py::return_value_policy::reference)
         .def("sendRawPacket", py::overload_cast<std::string const&>(&PacketSender::sendRawPacket))
         .def("sendGroupMessage", py::overload_cast<uint64_t, std::string const&>(&PacketSender::sendGroupMessage))
         .def("sendGroupMessage", py::overload_cast<uint64_t, Message const&>(&PacketSender::sendGroupMessage))
@@ -62,7 +62,11 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "sendPrivateMessage",
@@ -75,16 +79,23 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .def("sendFriendPoke", &PacketSender::sendFriendPoke)
         .def("sendGroupPoke", &PacketSender::sendGroupPoke)
         .def("deleteMessage", &PacketSender::deleteMessage)
-        .def("sendLike", &PacketSender::sendLike)
-        .def("kickGroupMember", &PacketSender::kickGroupMember)
-        .def("setGroupMemberMute", &PacketSender::setGroupMemberMute)
-        .def("setGroupGlobalMute", &PacketSender::setGroupGlobalMute)
-        .def("setGroupAdmin", &PacketSender::setGroupAdmin)
+        .def("sendLike", &PacketSender::sendLike, py::arg(), py::arg() = 10)
+        .def("kickGroupMember", &PacketSender::kickGroupMember, py::arg(), py::arg(), py::arg() = false)
+        .def("setGroupMemberMute", &PacketSender::setGroupMemberMute, py::arg(), py::arg(), py::arg() = 1800)
+        .def("setGroupGlobalMute", &PacketSender::setGroupGlobalMute, py::arg(), py::arg() = true)
+        .def("setGroupAdmin", &PacketSender::setGroupAdmin, py::arg(), py::arg(), py::arg() = true)
         .def("setGroupCard", &PacketSender::setGroupCard)
         .def("setGroupName", &PacketSender::setGroupName)
-        .def("leaveGroup", &PacketSender::leaveGroup)
-        .def("handleFriendAddRequest", &PacketSender::handleFriendAddRequest)
-        .def("handleGroupAddRequest", &PacketSender::handleGroupAddRequest)
+        .def("leaveGroup", &PacketSender::leaveGroup, py::arg(), py::arg() = false)
+        .def("handleFriendAddRequest", &PacketSender::handleFriendAddRequest, py::arg(), py::arg(), py::arg() = "")
+        .def(
+            "handleGroupAddRequest",
+            &PacketSender::handleGroupAddRequest,
+            py::arg(),
+            py::arg(),
+            py::arg(),
+            py::arg() = ""
+        )
         .def(
             "getMessage",
             [](PacketSender&                           self,
@@ -102,7 +113,11 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getGroupsListInfo",
@@ -119,7 +134,10 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getForwardMessage",
@@ -138,7 +156,11 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getLoginInfo",
@@ -155,7 +177,10 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getStrangerInfo",
@@ -174,7 +199,11 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getFriendsListInfo",
@@ -191,7 +220,10 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def("getFriendsList", &PacketSender::getFriendsList)
         .def(
@@ -211,7 +243,11 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getGroupMemberInfo",
@@ -232,7 +268,12 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
         .def(
             "getGroupMembersListInfo",
@@ -251,9 +292,27 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
                     std::move(timeoutCallback),
                     seconds
                 );
-            }
+            },
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
         )
-        .def("getGroupMembersList", &PacketSender::getGroupMembersList)
-        .def("chooseRandomGroupMember", &PacketSender::chooseRandomGroupMember)
-        .def("getGroupsList", &PacketSender::getGroupsList);
+        .def(
+            "getGroupMembersList",
+            &PacketSender::getGroupMembersList,
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
+        )
+        .def(
+            "chooseRandomGroupMember",
+            &PacketSender::chooseRandomGroupMember,
+            py::arg(),
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
+        )
+        .def("getGroupsList", &PacketSender::getGroupsList, py::arg(), py::arg() = nullptr, py::arg() = 5);
 }

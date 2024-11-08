@@ -9,10 +9,7 @@ namespace py = pybind11;
 
 PYBIND11_EMBEDDED_MODULE(CommandRegistryAPI, m) {
     py::class_<CommandRegistry>(m, "CommandRegistry")
-        .def_static(
-            "getInstance",
-            [] { return std::unique_ptr<CommandRegistry, py::nodelete>(&CommandRegistry::getInstance()); }
-        )
+        .def_static("getInstance", &CommandRegistry::getInstance, py::return_value_policy::reference)
         .def(
             "registerCommand",
             py::overload_cast<std::string const&, std::function<void(std::vector<std::string> const&)>>(
