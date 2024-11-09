@@ -9,9 +9,10 @@ namespace py = pybind11;
 
 class PythonPluginEngine : public IPluginEngine {
 private:
-    Logger                                      mLogger{"KobeBryantScriptEngine-Python"};
-    py::scoped_interpreter                      mGuard{};
-    std::unordered_map<std::string, py::object> mPluginModules;
+    Logger                                                 mLogger{"KobeBryantScriptEngine-Python"};
+    py::scoped_interpreter                                 mGuard{};
+    std::unordered_map<std::string, py::module>            mPluginModules;
+    std::unordered_map<std::string, std::filesystem::path> mModuleEntrys;
 
 public:
     PythonPluginEngine();
@@ -25,4 +26,8 @@ public:
     bool unloadPlugin(std::string const& plugin) override;
 
     Logger& getLogger();
+
+    void backupEntry(std::filesystem::path const& entry);
+
+    void resumeEntry(std::filesystem::path const& entry);
 };

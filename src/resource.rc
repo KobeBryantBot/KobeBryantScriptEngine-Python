@@ -1,0 +1,3 @@
+#include "resource.hpp"
+
+EMPTY_MODULE TEXTFILE "../resources/empty.py"

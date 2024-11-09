@@ -18,12 +18,14 @@ add_compile_definitions(
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
+set(RESOURCE_FILE ${PROJECT_SOURCE_DIR}/src/resource.rc)
+
 include_directories(${PROJECT_SOURCE_DIR}/sdk/include)
 include_directories(${PROJECT_SOURCE_DIR}/sdk/include/third)
 include_directories(${PROJECT_SOURCE_DIR}/third/include)
 include_directories(${PROJECT_SOURCE_DIR}/third/include/Python)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${RESOURCE_FILE})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${PROJECT_SOURCE_DIR}/sdk/lib/KobeBryant.lib
