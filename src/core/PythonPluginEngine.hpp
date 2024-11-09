@@ -1,4 +1,5 @@
 #include "api/Logger.hpp"
+#include "api/i18n/LangI18n.hpp"
 #include "api/plugin/IPluginEngine.hpp"
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
@@ -10,6 +11,7 @@ namespace py = pybind11;
 class PythonPluginEngine : public IPluginEngine {
 private:
     Logger                                                 mLogger{"KobeBryantScriptEngine-Python"};
+    std::unique_ptr<i18n::LangI18n>                        mI18n;
     py::scoped_interpreter                                 mGuard{};
     std::unordered_map<std::string, py::module>            mPluginModules;
     std::unordered_map<std::string, std::filesystem::path> mModuleEntrys;

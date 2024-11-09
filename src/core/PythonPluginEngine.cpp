@@ -1,20 +1,26 @@
 #include "PythonPluginEngine.hpp"
 #include "../resource.hpp"
 #include "api/utils/FileUtils.hpp"
+#include "api/utils/ModuleUtils.hpp"
 #include "api/utils/StringUtils.hpp"
 
 // 必须释放全局 GIL 锁
-static std::unique_ptr<py::gil_scoped_release> release = nullptr;
+static std::unique_ptr<py::gil_scoped_release> mRelease = nullptr;
 
 PythonPluginEngine::PythonPluginEngine() : IPluginEngine() {
-    if (!release) {
-        release = std::make_unique<py::gil_scoped_release>();
-    }
+    mRelease = std::make_unique<py::gil_scoped_release>();
+    mI18n    = std::make_unique<i18n::LangI18n>("./plugins/KobeBryantScriptEngine-Python/lang", "zh_CN");
+    mI18n->updateOrCreateLanguage("zh_CN", *utils::readCurrentResource(LANG_ZH_CN));
+    mI18n->loadAllLanguages();
+    mI18n->forEachLangFile([](const std::string& languageCode, const i18n::LangLanguage& language) {
+        Logger::appendLanguage(languageCode, language);
+    });
 };
 
 PythonPluginEngine::~PythonPluginEngine() {
-    release.reset();
-    release = nullptr;
+    mI18n.reset();
+    mRelease.reset();
+    mRelease = nullptr;
 }
 
 std::string PythonPluginEngine::getPluginType() const { return "script-python"; }
@@ -22,11 +28,11 @@ std::string PythonPluginEngine::getPluginType() const { return "script-python"; 
 bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::path const& entry) {
     try {
         py::gil_scoped_acquire require{};
-        getLogger().info("正在加载Python插件 {}", plugin);
+        getLogger().info("engine.python.plugin.loading", {plugin});
         // 安装pip包
         std::string requirePath = "./plugins/" + plugin + "/requirements.txt";
         if (std::filesystem::exists(requirePath)) {
-            getLogger().info("正在加载Python插件 {} 的pip依赖包...", plugin);
+            getLogger().info("engine.python.plugin.pip.loading", {plugin});
             system(("pip install -r " + requirePath + " >NUL 2>&1").c_str());
         }
         // 注册模块路径到 sys.path
@@ -55,19 +61,19 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
         mPluginModules[plugin].attr("on_enable")();
         // 清理模块路径
         sys_path.attr("remove")(py::str(entry.parent_path().string()));
-        getLogger().info("已成功加载Python插件 {}", plugin);
+        getLogger().info("engine.python.plugin.loaded", {plugin});
         return true;
     } catch (const std::exception& e) {
-        getLogger().error("加载Python插件 {} 时捕获到异常:\n {}", plugin, e.what());
+        getLogger().error("engine.python.plugin.load.exception", {plugin, e.what()});
     } catch (...) {
-        getLogger().error("加载Python插件 {} 时出现未知异常", plugin);
+        getLogger().error("engine.python.plugin.load.unknownException", {plugin});
     }
     return false;
 }
 
 bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
     try {
-        getLogger().info("正在卸载Python插件 {}", plugin);
+        getLogger().info("engine.python.plugin.unloading", {plugin});
         py::gil_scoped_acquire require{};
         // 禁用插件
         mPluginModules[plugin].attr("on_disable")();
@@ -80,12 +86,12 @@ bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
         reload_func(mPluginModules[plugin]);
         // 还原模块
         resumeEntry(path);
-        getLogger().info("已成功卸载Python插件 {}", plugin);
+        getLogger().info("engine.python.plugin.unloaded", {plugin});
         return true;
     } catch (const std::exception& e) {
-        getLogger().error("卸载Python插件 {} 时捕获到异常:\n {}", plugin, e.what());
+        getLogger().error("engine.python.plugin.unload.exception", {plugin, e.what()});
     } catch (...) {
-        getLogger().error("卸载Python插件 {} 时出现未知异常", plugin);
+        getLogger().error("engine.python.plugin.unload.unknownException", {plugin});
     }
     return false;
 }

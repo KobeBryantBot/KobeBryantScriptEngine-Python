@@ -76,9 +76,9 @@ public:
                     }
                 }
             } catch (const std::exception& e) {
-                logger.error("解析事件时发生异常: {}", e.what());
+                logger.error("engine.python.event.exception", {e.what()});
             } catch (...) {
-                logger.error("解析事件时发生未知异常");
+                logger.error("engine.python.event.unknownException");
             }
         });
     }
@@ -115,9 +115,9 @@ public:
                 }
             }
         } catch (const std::exception& e) {
-            logger.error("发布事件时发生异常: {}", e.what());
+            logger.error("engine.python.event.exception", {e.what()});
         } catch (...) {
-            logger.error("发布事件时发生未知异常");
+            logger.error("engine.python.event.unknownException");
         }
     }
 };
