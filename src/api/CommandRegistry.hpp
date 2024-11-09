@@ -1,5 +1,7 @@
 #pragma once
 #include "api/CommandRegistry.hpp"
+#include <map>
+#include <set>
 
 class ScriptCommandManager {
     std::map<std::string, std::set<std::string>> mPluginCommands;

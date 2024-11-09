@@ -9,3 +9,5 @@ engine.python.plugin.unload.exception=卸载Python插件 %1$s 时捕获到异常
 engine.python.plugin.unload.unknownException=卸载Python插件 %1$s 时出现未知异常
 engine.python.event.exception=事件系统捕获到异常: %s
 engine.python.event.unknownException=事件系统发生了未知异常
+engine.python.loaded=Python插件引擎已加载！当前版本 %s
+engine.python.unloaded=Python插件引擎已卸载！
