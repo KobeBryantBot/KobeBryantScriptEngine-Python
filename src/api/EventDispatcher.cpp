@@ -1,117 +1,53 @@
-#include "api/EventBus.hpp"
-#include "api/Logger.hpp"
-#include "api/event/LoggerOutputEvent.hpp"
-#include "api/event/MessageEvent.hpp"
-#include "api/event/MetaEvent.hpp"
-#include "api/event/NoticeEvent.hpp"
-#include "api/event/PacketEvent.hpp"
-#include "api/event/RequestEvent.hpp"
-#include "api/utils/StringUtils.hpp"
-#include "magic_enum/magic_enum.hpp"
-#include "nlohmann/json.hpp"
-#include <pybind11/chrono.h>
-#include <pybind11/complex.h>
-#include <pybind11/embed.h>
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
-
-namespace py = pybind11;
+#include "EventDispatcher.hpp"
 
 Logger logger("KobeBryantScriptEngine-Python");
 
-struct ScriptListener {
-    uint64_t    mId;
-    std::string mType;
-    bool        operator<(const ScriptListener& rhs) const { return mId < rhs.mId; }
-    bool        operator==(const ScriptListener& rhs) const { return mId == rhs.mId; }
-};
+bool ScriptListener::operator<(const ScriptListener& rhs) const { return mId < rhs.mId; }
+bool ScriptListener::operator==(const ScriptListener& rhs) const { return mId == rhs.mId; }
 
-class ScriptEventBusImpl {
-    std::map<ScriptListener, std::function<void(std::string const&)>> mListeners;
-    uint64_t                                                          mNextId = 0;
 
-public:
-    ScriptEventBusImpl() {
-        EventBus::getInstance().subscribe<PacketEvent>([](PacketEvent const& ev) {
-            try {
-                auto packet = ev.mPacket;
-                if (packet.contains("post_type")) {
-                    std::string post_type = packet["post_type"];
-                    switch (utils::doHash(post_type)) {
-                    case utils::doHash("meta_event"): {
-                        std::string meta_event_type = packet["meta_event_type"];
-                        return ScriptEventBusImpl::getInstance().publish(
-                            fmt::format("{}.{}", post_type, meta_event_type),
-                            packet.dump()
-                        );
-                    }
-                    case utils::doHash("message"): {
-                        std::string message_type = packet["message_type"];
-                        std::string sub_type     = packet["sub_type"];
-                        std::string rawMessage   = packet["raw_message"];
-                        utils::ReplaceStr(rawMessage, "&#91;", "[");
-                        utils::ReplaceStr(rawMessage, "&#93;", "]");
-                        utils::ReplaceStr(rawMessage, "&#44;", ",");
-                        utils::ReplaceStr(rawMessage, "&amp;", "&");
-                        packet["raw_message"] = rawMessage;
-                        return ScriptEventBusImpl::getInstance().publish(
-                            fmt::format("{}.{}.{}", post_type, message_type, sub_type),
-                            packet.dump()
-                        );
-                    }
-                    case utils::doHash("notice"): {
-                        std::string notice_type = packet["notice_type"];
-                        return ScriptEventBusImpl::getInstance().publish(
-                            fmt::format("{}.{}", post_type, notice_type),
-                            packet.dump()
-                        );
-                    }
-                    case utils::doHash("request"): {
-                        std::string request_type = packet["request_type"];
-                        return ScriptEventBusImpl::getInstance().publish(
-                            fmt::format("{}.{}", post_type, request_type),
-                            packet.dump()
-                        );
-                    }
-                    }
-                }
-            } catch (const std::exception& e) {
-                logger.error("engine.python.event.exception", {e.what()});
-            } catch (...) {
-                logger.error("engine.python.event.unknownException");
-            }
-        });
-    }
-
-    static ScriptEventBusImpl& getInstance() {
-        static std::unique_ptr<ScriptEventBusImpl> instance;
-        if (!instance) {
-            instance = std::make_unique<ScriptEventBusImpl>();
-        }
-        return *instance;
-    }
-
-    ScriptListener add(std::string const& event, std::function<void(std::string const&)> func) {
-        auto id = mNextId;
-        mNextId++;
-        auto listener        = ScriptListener(id, event);
-        mListeners[listener] = std::move(func);
-        return listener;
-    }
-
-    bool remove(ScriptListener const& listener) {
-        if (mListeners.contains(listener)) {
-            mListeners.erase(listener);
-            return true;
-        }
-        return false;
-    }
-
-    void publish(std::string const& event, std::string const& data) {
+ScriptEventBusImpl::ScriptEventBusImpl() {
+    EventBus::getInstance().subscribe<PacketEvent>([](PacketEvent const& ev) {
         try {
-            for (auto& [listener, func] : mListeners) {
-                if (listener.mType == event && func) {
-                    func(data);
+            auto packet = ev.mPacket;
+            if (packet.contains("post_type")) {
+                std::string post_type = packet["post_type"];
+                switch (utils::doHash(post_type)) {
+                case utils::doHash("meta_event"): {
+                    std::string meta_event_type = packet["meta_event_type"];
+                    return ScriptEventBusImpl::getInstance().publish(
+                        fmt::format("{}.{}", post_type, meta_event_type),
+                        packet.dump()
+                    );
+                }
+                case utils::doHash("message"): {
+                    std::string message_type = packet["message_type"];
+                    std::string sub_type     = packet["sub_type"];
+                    std::string rawMessage   = packet["raw_message"];
+                    utils::ReplaceStr(rawMessage, "&#91;", "[");
+                    utils::ReplaceStr(rawMessage, "&#93;", "]");
+                    utils::ReplaceStr(rawMessage, "&#44;", ",");
+                    utils::ReplaceStr(rawMessage, "&amp;", "&");
+                    packet["raw_message"] = rawMessage;
+                    return ScriptEventBusImpl::getInstance().publish(
+                        fmt::format("{}.{}.{}", post_type, message_type, sub_type),
+                        packet.dump()
+                    );
+                }
+                case utils::doHash("notice"): {
+                    std::string notice_type = packet["notice_type"];
+                    return ScriptEventBusImpl::getInstance().publish(
+                        fmt::format("{}.{}", post_type, notice_type),
+                        packet.dump()
+                    );
+                }
+                case utils::doHash("request"): {
+                    std::string request_type = packet["request_type"];
+                    return ScriptEventBusImpl::getInstance().publish(
+                        fmt::format("{}.{}", post_type, request_type),
+                        packet.dump()
+                    );
+                }
                 }
             }
         } catch (const std::exception& e) {
@@ -119,8 +55,61 @@ public:
         } catch (...) {
             logger.error("engine.python.event.unknownException");
         }
+    });
+}
+
+ScriptEventBusImpl& ScriptEventBusImpl::getInstance() {
+    static std::unique_ptr<ScriptEventBusImpl> instance;
+    if (!instance) {
+        instance = std::make_unique<ScriptEventBusImpl>();
     }
-};
+    return *instance;
+}
+
+ScriptListener ScriptEventBusImpl::add(std::string const& event, std::function<void(std::string const&)> func) {
+    auto id = mNextId;
+    mNextId++;
+    auto listener        = ScriptListener(id, event);
+    mListeners[listener] = std::move(func);
+    return listener;
+}
+
+bool ScriptEventBusImpl::remove(ScriptListener const& listener) {
+    if (mListeners.contains(listener)) {
+        mListeners.erase(listener);
+        return true;
+    }
+    return false;
+}
+
+void ScriptEventBusImpl::publish(std::string const& event, std::string const& data) {
+    try {
+        for (auto& [listener, func] : mListeners) {
+            if (listener.mType == event && func) {
+                func(data);
+            }
+        }
+    } catch (const std::exception& e) {
+        logger.error("engine.python.event.exception", {e.what()});
+    } catch (...) {
+        logger.error("engine.python.event.unknownException");
+    }
+}
+
+void ScriptEventBusImpl::addPluginListener(std::string const& plugin, ScriptListener const& listener) {
+    mPluginListeners[plugin].insert(listener);
+}
+
+void ScriptEventBusImpl::removePluginListener(std::string const& plugin, ScriptListener const& listener) {
+    mPluginListeners[plugin].erase(listener);
+}
+
+void ScriptEventBusImpl::removePluginListeners(std::string const& plugin) {
+    for (auto& listener : mPluginListeners[plugin]) {
+        remove(listener);
+    }
+    mPluginListeners.erase(plugin);
+}
 
 class ScriptEventBus {
 public:
@@ -140,6 +129,20 @@ PYBIND11_EMBEDDED_MODULE(EventAPI, m) {
         .def_readonly("mType", &ScriptListener::mType);
 
     py::class_<ScriptEventBus>(m, "EventBus")
-        .def_static("add", &ScriptEventBus::add)
-        .def_static("remove", &ScriptEventBus::remove);
+        .def_static(
+            "add",
+            [](std::string const& event, std::function<void(std::string const&)> func) -> ScriptListener {
+                auto listener = ScriptEventBus::add(event, func);
+                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+                    ScriptEventBusImpl::getInstance().addPluginListener(*plugin, listener);
+                }
+                return listener;
+            }
+        )
+        .def_static("remove", [](ScriptListener const& listener) -> bool {
+            if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+                ScriptEventBusImpl::getInstance().removePluginListener(*plugin, listener);
+            }
+            return ScriptEventBus::remove(listener);
+        });
 }

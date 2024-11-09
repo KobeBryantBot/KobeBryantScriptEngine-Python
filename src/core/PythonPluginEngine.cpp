@@ -1,4 +1,5 @@
 #include "PythonPluginEngine.hpp"
+#include "../api/EventDispatcher.hpp"
 #include "../resource.hpp"
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/ModuleUtils.hpp"
@@ -27,6 +28,7 @@ std::string PythonPluginEngine::getPluginType() const { return "script-python"; 
 
 bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::path const& entry) {
     try {
+        // 必须先上 GIL 锁
         py::gil_scoped_acquire require{};
         getLogger().info("engine.python.plugin.loading", {plugin});
         // 安装pip包
@@ -74,6 +76,9 @@ bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::
 bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
     try {
         getLogger().info("engine.python.plugin.unloading", {plugin});
+        // 清理资源
+        ScriptEventBusImpl::getInstance().removePluginListeners(plugin);
+        // 必须先上 GIL 锁
         py::gil_scoped_acquire require{};
         // 禁用插件
         mPluginModules[plugin].attr("on_disable")();
@@ -118,4 +123,27 @@ void PythonPluginEngine::resumeEntry(std::filesystem::path const& entry) {
         std::filesystem::copy_file(newPath, entry);
         std::filesystem::remove(newPath);
     }
+}
+
+std::optional<std::string> PythonPluginEngine::getCallingPlugin() {
+    py::object stack = py::module::import("inspect").attr("stack");
+    py::list   trace = stack();
+    // 从堆栈中提取调用者信息
+    if (!trace.empty()) {
+        py::object         frame_info = trace[0].cast<py::object>();
+        py::object         frame      = frame_info.attr("frame");
+        py::object         filename   = frame.attr("f_code").attr("co_filename");
+        std::string        pluginName = py::str(filename);
+        static std::string parentPath = std::filesystem::absolute("./plugins/").string();
+        utils::ReplaceStr(pluginName, parentPath, "");
+        auto pos = pluginName.find("/");
+        if (pos == std::string::npos) {
+            pos = pluginName.find("\\");
+        }
+        if (pos != std::string::npos) {
+            pluginName.erase(pos);
+        }
+        return pluginName;
+    }
+    return {};
 }

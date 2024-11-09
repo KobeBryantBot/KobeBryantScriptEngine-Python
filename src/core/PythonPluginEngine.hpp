@@ -1,3 +1,4 @@
+#pragma once
 #include "api/Logger.hpp"
 #include "api/i18n/LangI18n.hpp"
 #include "api/plugin/IPluginEngine.hpp"
@@ -32,4 +33,6 @@ public:
     void backupEntry(std::filesystem::path const& entry);
 
     void resumeEntry(std::filesystem::path const& entry);
+
+    static std::optional<std::string> getCallingPlugin();
 };
