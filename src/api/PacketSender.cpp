@@ -9,6 +9,14 @@ namespace py = pybind11;
 
 PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
     py::class_<Message> MessageClass(m, "Message");
+
+    py::enum_<Message::ImageType>(MessageClass, "ImageType")
+        .value("Path", Message::ImageType::Path)
+        .value("Binary", Message::ImageType::Binary)
+        .value("Url", Message::ImageType::Url)
+        .value("Base64", Message::ImageType::Base64)
+        .export_values();
+
     MessageClass.def(py::init<>())
         .def("at", &Message::at)
         .def("reply", &Message::reply)
@@ -36,13 +44,6 @@ PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
         .def("shake", &Message::shake)
         .def("contact", &Message::contact)
         .def("json", &Message::json);
-
-    py::enum_<Message::ImageType>(MessageClass, "ImageType")
-        .value("Path", Message::ImageType::Path)
-        .value("Binary", Message::ImageType::Binary)
-        .value("Url", Message::ImageType::Url)
-        .value("Base64", Message::ImageType::Base64)
-        .export_values();
 
     py::enum_<RequestSubType>(m, "RequestSubType")
         .value("Add", RequestSubType::Add)
