@@ -1,4 +1,3 @@
 #include "resource.hpp"
 
-EMPTY_MODULE TEXTFILE "../resources/empty.py"
 LANG_ZH_CN   TEXTFILE "../resources/zh_CN.lang"

@@ -1,7 +1,6 @@
 #include "PythonPluginEngine.hpp"
 #include "../resource.hpp"
 #include "api/utils/FileUtils.hpp"
-#include "api/utils/ModuleUtils.hpp"
 #include "api/utils/StringUtils.hpp"
 
 // 必须释放全局 GIL 锁
@@ -102,8 +101,7 @@ void PythonPluginEngine::backupEntry(std::filesystem::path const& entry) {
     if (std::filesystem::exists(entry)) {
         std::filesystem::copy(entry.string(), newPath);
     }
-    auto data = *utils::readCurrentResource(EMPTY_MODULE);
-    utils::writeFile(entry, data);
+    utils::writeFile(entry, "");
 }
 
 void PythonPluginEngine::resumeEntry(std::filesystem::path const& entry) {
