@@ -10,11 +10,11 @@ extern void initCommandRegistry(py::module_& m);
 extern void initEvent(py::module_& m);
 extern void initSchedule(py::module_& m);
 extern void initPacket(py::module_& m);
-extern void initEvent(py::module_& m);
+extern void initLogger(py::module_& m);
 
 PYBIND11_EMBEDDED_MODULE(KobeBryantAPI, m) {
     initCommandRegistry(m);
-    initEvent(m);
+    initLogger(m);
     initEvent(m);
     initPacket(m);
     initSchedule(m);
