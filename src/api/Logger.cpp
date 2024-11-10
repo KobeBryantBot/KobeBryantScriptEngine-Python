@@ -19,7 +19,7 @@ public:
     void debug(std::string const& content) { return printStr(LogLevel::Debug, content); }
 };
 
-PYBIND11_EMBEDDED_MODULE(LoggerAPI, m) {
+void initLogger(py::module_& m) {
     py::class_<ScriptLogger> LoggerClass(m, "Logger");
     LoggerClass.def(py::init<>())
         .def(py::init<std::string const&>())

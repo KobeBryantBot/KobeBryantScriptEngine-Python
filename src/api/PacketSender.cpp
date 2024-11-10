@@ -7,7 +7,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_EMBEDDED_MODULE(PacketSenderAPI, m) {
+void initPacket(py::module_& m) {
     py::class_<Message> MessageClass(m, "Message");
 
     py::enum_<Message::ImageType>(MessageClass, "ImageType")

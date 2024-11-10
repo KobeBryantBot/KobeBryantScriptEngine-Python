@@ -123,7 +123,7 @@ public:
 };
 
 
-PYBIND11_EMBEDDED_MODULE(EventAPI, m) {
+void initEvent(py::module_& m) {
     py::class_<ScriptListener>(m, "Listener")
         .def_readonly("mId", &ScriptListener::mId)
         .def_readonly("mType", &ScriptListener::mType);

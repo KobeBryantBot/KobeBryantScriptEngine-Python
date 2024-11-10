@@ -74,6 +74,8 @@ def main():
 
     # 复制.dll文件到dllname文件夹
     shutil.copy(dll_file_path, folder_name)
+    
+    shutil.copy("../python/KobeBryantAPI.pyi", "../bin")
 
 
 if __name__ == "__main__":

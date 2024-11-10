@@ -34,7 +34,7 @@ void ScriptSchedule::removePluginTasks(std::string const& plugin) {
     mPluginTasks.erase(plugin);
 }
 
-PYBIND11_EMBEDDED_MODULE(ScheduleAPI, m) {
+void initSchedule(py::module_& m) {
     py::class_<ScriptSchedule>(m, "Schedule")
         .def_static(
             "addDelayTask",

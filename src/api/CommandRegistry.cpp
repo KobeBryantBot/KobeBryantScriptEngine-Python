@@ -31,7 +31,7 @@ void ScriptCommandManager::removePluginCommands(std::string const& plugin) {
     mPluginCommands.erase(plugin);
 }
 
-PYBIND11_EMBEDDED_MODULE(CommandRegistryAPI, m) {
+void initCommandRegistry(py::module_& m) {
     py::class_<CommandRegistry>(m, "CommandRegistry")
         .def_static(
             "registerCommand",
