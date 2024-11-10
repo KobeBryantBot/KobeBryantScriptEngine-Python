@@ -33,6 +33,7 @@ void initLogger(py::module_& m) {
         .def("debug", &ScriptLogger::debug);
 
     py::enum_<Logger::LogLevel>(LoggerClass, "LogLevel")
+        .value("Trace", Logger::LogLevel::Trace)
         .value("Fatal", Logger::LogLevel::Fatal)
         .value("Error", Logger::LogLevel::Error)
         .value("Warn", Logger::LogLevel::Warn)

@@ -21,11 +21,12 @@ class EventBus:
 
 class Logger:
     class LogLevel(Enum):
-        Fatal = 0
-        Error = 1
-        Warn = 2
-        Info = 3
-        Debug = 4
+        Trace = 0
+        Fatal = 1
+        Error = 2
+        Warn = 3
+        Info = 4
+        Debug = 5
 
     @overload
     def __init__(self) -> None: ...
