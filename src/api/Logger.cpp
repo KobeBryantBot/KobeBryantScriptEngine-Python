@@ -1,4 +1,5 @@
 #include "api/Logger.hpp"
+#include "../core/PythonPluginEngine.hpp"
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
 #include <pybind11/embed.h>
@@ -9,7 +10,11 @@ namespace py = pybind11;
 
 class ScriptLogger : public Logger {
 public:
-    ScriptLogger() : Logger() {}
+    ScriptLogger() : Logger() {
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            setTitle(*plugin);
+        }
+    }
     ScriptLogger(std::string const& title) : Logger(title) {}
 
     void fatal(std::string const& content) { return printStr(LogLevel::Fatal, content); }
