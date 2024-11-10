@@ -11,6 +11,7 @@ extern void initEvent(py::module_& m);
 extern void initSchedule(py::module_& m);
 extern void initPacket(py::module_& m);
 extern void initLogger(py::module_& m);
+extern void initService(py::module_& m);
 
 PYBIND11_EMBEDDED_MODULE(KobeBryantAPI, m) {
     initCommandRegistry(m);
@@ -18,4 +19,5 @@ PYBIND11_EMBEDDED_MODULE(KobeBryantAPI, m) {
     initEvent(m);
     initPacket(m);
     initSchedule(m);
+    initService(m);
 }

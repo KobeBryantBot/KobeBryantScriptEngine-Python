@@ -29,7 +29,7 @@ struct ScriptListener {
 class ScriptEventBusImpl {
     std::map<ScriptListener, std::function<void(std::string const&)>> mListeners;
     uint64_t                                                          mNextId = 0;
-    std::map<std::string, std::set<ScriptListener>>                   mPluginListeners;
+    std::unordered_map<std::string, std::set<ScriptListener>>         mPluginListeners;
 
 public:
     ScriptEventBusImpl();

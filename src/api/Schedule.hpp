@@ -9,7 +9,7 @@
 namespace py = pybind11;
 
 class ScriptSchedule {
-    std::map<std::string, std::set<size_t>> mPluginTasks;
+    std::unordered_map<std::string, std::unordered_set<size_t>> mPluginTasks;
 
 public:
     static size_t addDelayTask(int delay, std::function<void()> func);
