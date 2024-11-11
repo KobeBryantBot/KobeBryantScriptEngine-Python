@@ -4,6 +4,7 @@
 #include <pybind11/embed.h>
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
+#include <pybind11_json/pybind11_json.hpp>
 
 namespace py = pybind11;
 
@@ -57,22 +58,11 @@ void initPacket(py::module_& m) {
         .def("sendGroupMessage", py::overload_cast<uint64_t, Message const&>(&PacketSender::sendGroupMessage))
         .def(
             "sendRawPacket",
-            [](PacketSender&                           self,
-               std::string const&                      rawPacket,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.sendRawPacket(
-                    rawPacket,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            py::overload_cast<
+                std::string const&,
+                std::function<void(nlohmann::json const&)>,
+                std::function<void()>,
+                uint64_t>(&PacketSender::sendRawPacket),
             py::arg(),
             py::arg(),
             py::arg() = nullptr,
@@ -106,154 +96,34 @@ void initPacket(py::module_& m) {
             py::arg(),
             py::arg() = ""
         )
-        .def(
-            "getMessage",
-            [](PacketSender&                           self,
-               int64_t                                 messageId,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getMessage(
-                    messageId,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
-            py::arg(),
-            py::arg(),
-            py::arg() = nullptr,
-            py::arg() = 5
-        )
-        .def(
-            "getGroupsListInfo",
-            [](PacketSender&                           self,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getGroupsListInfo(
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
-            py::arg(),
-            py::arg() = nullptr,
-            py::arg() = 5
-        )
+        .def("getMessage", &PacketSender::getMessage, py::arg(), py::arg(), py::arg() = nullptr, py::arg() = 5)
+        .def("getGroupsListInfo", &PacketSender::getGroupsListInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
         .def(
             "getForwardMessage",
-            [](PacketSender&                           self,
-               std::string                             messageId,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getForwardMessage(
-                    messageId,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            &PacketSender::getForwardMessage,
             py::arg(),
             py::arg(),
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
-            "getLoginInfo",
-            [](PacketSender&                           self,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getLoginInfo(
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
-            py::arg(),
-            py::arg() = nullptr,
-            py::arg() = 5
-        )
+        .def("getLoginInfo", &PacketSender::getLoginInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
         .def(
             "getStrangerInfo",
-            [](PacketSender&                           self,
-               PacketSender::UserId                    target,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getStrangerInfo(
-                    target,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            py::overload_cast<uint64_t, std::function<void(nlohmann::json const&)>, std::function<void()>, uint64_t>(
+                &PacketSender::getStrangerInfo
+            ),
             py::arg(),
             py::arg(),
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
-            "getFriendsListInfo",
-            [](PacketSender&                           self,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getFriendsListInfo(
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
-            py::arg(),
-            py::arg() = nullptr,
-            py::arg() = 5
-        )
+        .def("getFriendsListInfo", &PacketSender::getFriendsListInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
         .def("getFriendsList", &PacketSender::getFriendsList)
         .def(
             "getGroupInfo",
-            [](PacketSender&                           self,
-               PacketSender::GroupId                   groupId,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getGroupInfo(
-                    groupId,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            py::overload_cast<uint64_t, std::function<void(nlohmann::json const&)>, std::function<void()>, uint64_t>(
+                &PacketSender::getGroupInfo
+            ),
             py::arg(),
             py::arg(),
             py::arg() = nullptr,
@@ -261,24 +131,12 @@ void initPacket(py::module_& m) {
         )
         .def(
             "getGroupMemberInfo",
-            [](PacketSender&                           self,
-               PacketSender::GroupId                   groupId,
-               PacketSender::UserId                    target,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getGroupMemberInfo(
-                    groupId,
-                    target,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            py::overload_cast<
+                uint64_t,
+                uint64_t,
+                std::function<void(nlohmann::json const&)>,
+                std::function<void()>,
+                uint64_t>(&PacketSender::getGroupMemberInfo),
             py::arg(),
             py::arg(),
             py::arg(),
@@ -287,22 +145,7 @@ void initPacket(py::module_& m) {
         )
         .def(
             "getGroupMembersListInfo",
-            [](PacketSender&                           self,
-               PacketSender::GroupId                   groupId,
-               std::function<void(std::string const&)> callback,
-               std::function<void()>                   timeoutCallback,
-               uint64_t                                seconds) {
-                return self.getGroupMembersListInfo(
-                    groupId,
-                    [=](nlohmann::json_abi_v3_11_3::json const& data) {
-                        if (callback) {
-                            callback(data.dump());
-                        }
-                    },
-                    std::move(timeoutCallback),
-                    seconds
-                );
-            },
+            &PacketSender::getGroupMembersListInfo,
             py::arg(),
             py::arg(),
             py::arg() = nullptr,

@@ -15,7 +15,7 @@ class Listener:
 
 class EventBus:
     @staticmethod
-    def add(event: str, callback: callable[[str], None]) -> Listener: ...
+    def add(event: str, callback: callable[[object], None]) -> Listener: ...
     @staticmethod
     def remove(listener: Listener) -> bool: ...
 
@@ -97,8 +97,8 @@ class PacketSender:
     def sendRawPacket(
         self,
         packet: str,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     @overload
@@ -133,62 +133,62 @@ class PacketSender:
     def getMessage(self, messageId: int) -> None: ...
     def getGroupsListInfo(
         self,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getForwardMessage(
         self,
         messageId: int,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getLoginInfo(
         self,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getStrangerInfo(
         self,
         target: int,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getFriendsListInfo(
         self,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getFriendsList(
         self,
         callback: callable[[List[int]], None],
-        timeoutCallback: callable[[str], None] = None,
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getGroupInfo(
         self,
         groupId: int,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getGroupMemberInfo(
         self,
         groupId: int,
         target: int,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getGroupMembersListInfo(
         self,
         groupId: int,
-        callback: callable[[str], None],
-        timeoutCallback: callable[[str], None] = None,
+        callback: callable[[object], None],
+        timeoutCallback: callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getGroupMembersList(

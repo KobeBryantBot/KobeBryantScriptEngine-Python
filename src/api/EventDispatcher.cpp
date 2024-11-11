@@ -17,7 +17,7 @@ ScriptEventBusImpl::ScriptEventBusImpl() {
                     std::string meta_event_type = packet["meta_event_type"];
                     return ScriptEventBusImpl::getInstance().publish(
                         fmt::format("{}.{}", post_type, meta_event_type),
-                        packet.dump()
+                        packet
                     );
                 }
                 case utils::doHash("message"): {
@@ -31,21 +31,21 @@ ScriptEventBusImpl::ScriptEventBusImpl() {
                     packet["raw_message"] = rawMessage;
                     return ScriptEventBusImpl::getInstance().publish(
                         fmt::format("{}.{}.{}", post_type, message_type, sub_type),
-                        packet.dump()
+                        packet
                     );
                 }
                 case utils::doHash("notice"): {
                     std::string notice_type = packet["notice_type"];
                     return ScriptEventBusImpl::getInstance().publish(
                         fmt::format("{}.{}", post_type, notice_type),
-                        packet.dump()
+                        packet
                     );
                 }
                 case utils::doHash("request"): {
                     std::string request_type = packet["request_type"];
                     return ScriptEventBusImpl::getInstance().publish(
                         fmt::format("{}.{}", post_type, request_type),
-                        packet.dump()
+                        packet
                     );
                 }
                 }
@@ -66,7 +66,7 @@ ScriptEventBusImpl& ScriptEventBusImpl::getInstance() {
     return *instance;
 }
 
-ScriptListener ScriptEventBusImpl::add(std::string const& event, std::function<void(std::string const&)> func) {
+ScriptListener ScriptEventBusImpl::add(std::string const& event, std::function<void(nlohmann::json const&)> func) {
     auto id = mNextId;
     mNextId++;
     auto listener        = ScriptListener(id, event);
@@ -82,7 +82,7 @@ bool ScriptEventBusImpl::remove(ScriptListener const& listener) {
     return false;
 }
 
-void ScriptEventBusImpl::publish(std::string const& event, std::string const& data) {
+void ScriptEventBusImpl::publish(std::string const& event, nlohmann::json const& data) {
     try {
         for (auto& [listener, func] : mListeners) {
             if (listener.mType == event && func) {
