@@ -17,27 +17,56 @@ class ScriptService : public Service {
     friend Service;
 
 public:
-    static std::any toAny(const pybind11::handle& obj) {
-        if (py::isinstance<py::int_>(obj)) {
-            return std::any(static_cast<uint64_t>(obj.cast<uint64_t>()));
-        } else if (py::isinstance<py::float_>(obj)) {
-            return std::any(obj.cast<double>());
-        } else if (py::isinstance<py::str>(obj)) {
-            return std::any(obj.cast<std::string>());
-        } else if (py::isinstance<py::bool_>(obj)) {
-            return std::any(obj.cast<bool>());
-        } else if (py::isinstance<py::tuple>(obj)) {
-            return std::any(obj.cast<std::tuple<>>());
-        } else if (py::isinstance<py::list>(obj)) {
-            return std::any(obj.cast<std::vector<py::object>>());
-        } else if (py::isinstance<py::dict>(obj)) {
-            return std::any(obj.cast<std::unordered_map<std::string, py::object>>());
-        } else if (py::isinstance<py::bytes>(obj)) {
-            return std::any(obj.cast<std::string>());
-        } else if (obj.is_none()) {
-            return std::any();
+    static py::object any_to_py(std::any const& any_value) {
+        auto& type = any_value.type();
+        if (type == typeid(ScriptType)) {
+            return py::cast(std::any_cast<ScriptType>(any_value));
+        } else if (type == typeid(void) || type == typeid(std::nullptr_t)) {
+            return py::none();
+        } else if (type == typeid(int8_t)) {
+            return py::cast(std::any_cast<int8_t>(any_value));
+        } else if (type == typeid(uint8_t)) {
+            return py::cast(std::any_cast<uint8_t>(any_value));
+        } else if (type == typeid(int16_t)) {
+            return py::cast(std::any_cast<int16_t>(any_value));
+        } else if (type == typeid(uint16_t)) {
+            return py::cast(std::any_cast<uint16_t>(any_value));
+        } else if (type == typeid(int)) {
+            return py::cast(std::any_cast<int>(any_value));
+        } else if (type == typeid(uint32_t)) {
+            return py::cast(std::any_cast<uint32_t>(any_value));
+        } else if (type == typeid(int64_t)) {
+            return py::cast(std::any_cast<int64_t>(any_value));
+        } else if (type == typeid(uint64_t)) {
+            return py::cast(std::any_cast<uint64_t>(any_value));
+        } else if (type == typeid(double)) {
+            return py::cast(std::any_cast<double>(any_value));
+        } else if (type == typeid(float)) {
+            return py::cast(std::any_cast<float>(any_value));
+        } else if (type == typeid(std::string)) {
+            return py::cast(std::any_cast<std::string>(any_value));
+        } else if (type == typeid(bool)) {
+            return py::cast(std::any_cast<bool>(any_value));
         } else {
-            throw std::runtime_error("Unsupported argument type");
+            throw std::runtime_error("Unsupported C++ type in function result");
+        }
+    }
+
+    static std::any variant_to_any(Service::ScriptType const& var) {
+        if (std::holds_alternative<int64_t>(var)) {
+            return std::any(std::get<int64_t>(var));
+        } else if (std::holds_alternative<double>(var)) {
+            return std::any(std::get<double>(var));
+        } else if (std::holds_alternative<std::string>(var)) {
+            return std::any(std::get<std::string>(var));
+        } else if (std::holds_alternative<bool>(var)) {
+            return std::any(std::get<bool>(var));
+        } else if (std::holds_alternative<std::vector<Service::ScriptTypeBase>>(var)) {
+            return std::any(std::get<std::vector<Service::ScriptTypeBase>>(var));
+        } else if (std::holds_alternative<std::unordered_map<std::string, Service::ScriptTypeBase>>(var)) {
+            return std::any(std::get<std::unordered_map<std::string, Service::ScriptTypeBase>>(var));
+        } else {
+            return std::any();
         }
     }
 
@@ -53,10 +82,10 @@ public:
             auto func = [py_func](std::vector<std::any> const& args) -> std::any {
                 py::tuple args_tuple(args.size());
                 for (size_t i = 0; i < args.size(); ++i) {
-                    args_tuple[i] = py::cast(args[i]);
+                    args_tuple[i] = py::cast(cast_type<ScriptType>(args[i]));
                 }
                 py::object result = py_func(*args_tuple);
-                return toAny(result);
+                return std::any(py::cast<ScriptType>(result));
             };
             return exportAnyFunc(*plugin, funcName, func);
         }
@@ -67,28 +96,32 @@ public:
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             auto func = importAnyFunc(pluginName, funcName);
             return py::cpp_function([func](py::args args) -> py::object {
-                std::vector<std::any> cxx_args;
-                for (auto& arg : args) {
-                    cxx_args.push_back(toAny(arg));
+                std::any result;
+                try {
+                    std::vector<std::any> cxx_args;
+                    for (auto& arg : args) {
+                        cxx_args.push_back(std::any(py::cast<ScriptType>(arg)));
+                    }
+                    result = func(cxx_args);
+                } catch (std::exception const& e) {
+                    try {
+                        std::vector<std::any> cxx_args;
+                        for (auto& arg : args) {
+                            cxx_args.push_back(variant_to_any(py::cast<ScriptType>(arg)));
+                        }
+                        result = func(cxx_args);
+                    } catch (...) {
+                        throw std::runtime_error(e.what());
+                    }
                 }
-                std::any result = func(cxx_args);
-                if (result.type() == typeid(void)) {
-                    return py::none();
-                }
-                return py::cast(result);
+                return any_to_py(result);
             });
         }
         return nullptr;
     }
 };
 
-int Test(double a) {
-    Logger().warn("call {}", a);
-    return false;
-}
-
 void initService(py::module_& m) {
-    Service::exportFunc<int, double>("test", &Test);
     py::class_<ScriptService>(m, "Service")
         .def_static("hasFunc", &ScriptService::hasFunc)
         .def_static("exportFunc", &ScriptService::exportFunc)
