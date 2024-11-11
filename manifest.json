@@ -1,5 +1,8 @@
 {
     "name": "{PluginName}",
     "entry": "{PluginName}.dll",
-    "type": "engine"
+    "type": "native",
+    "preload": [
+        "Python313/python313.dll"
+    ]
 }

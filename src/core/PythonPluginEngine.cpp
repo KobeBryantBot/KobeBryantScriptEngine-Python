@@ -11,6 +11,7 @@
 static std::unique_ptr<py::gil_scoped_release> mRelease = nullptr;
 
 PythonPluginEngine::PythonPluginEngine() : IPluginEngine() {
+    Py_SetPythonHome(L"./plugins/KobeBryantScriptEngine-Python/Python313");
     mRelease = std::make_unique<py::gil_scoped_release>();
     mI18n    = std::make_unique<i18n::LangI18n>("./plugins/KobeBryantScriptEngine-Python/lang", "zh_CN");
     mI18n->updateOrCreateLanguage("zh_CN", *utils::readCurrentResource(LANG_ZH_CN));

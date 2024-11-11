@@ -113,7 +113,7 @@ void ScriptEventBusImpl::removePluginListeners(std::string const& plugin) {
 
 class ScriptEventBus {
 public:
-    static ScriptListener add(std::string const& event, std::function<void(std::string const&)> func) {
+    static ScriptListener add(std::string const& event, std::function<void(nlohmann::json const&)> func) {
         return ScriptEventBusImpl::getInstance().add(event, std::move(func));
     }
 
@@ -131,7 +131,7 @@ void initEvent(py::module_& m) {
     py::class_<ScriptEventBus>(m, "EventBus")
         .def_static(
             "add",
-            [](std::string const& event, std::function<void(std::string const&)> func) -> ScriptListener {
+            [](std::string const& event, std::function<void(nlohmann::json const&)> func) -> ScriptListener {
                 auto listener = ScriptEventBus::add(event, func);
                 if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
                     ScriptEventBusImpl::getInstance().addPluginListener(*plugin, listener);
