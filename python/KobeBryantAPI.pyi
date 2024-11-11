@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Union, Callable, Dict
 
 class CommandRegistry:
     @staticmethod
@@ -212,3 +212,22 @@ class PacketSender:
         timeoutCallback: callable[[str], None] = None,
         timeout: int = 5,
     ) -> None: ...
+
+ServiceFuncType = Union[
+    int,
+    bool,
+    str,
+    float,
+    List[Union[int, bool, str, float]],
+    Dict[str, Union[int, bool, str, float]],
+]
+
+class Service:
+    @staticmethod
+    def hasFunc(pluginName: str, funcName: str) -> bool: ...
+    @staticmethod
+    def exportFunc(funcName: str, func: ServiceFuncType) -> bool: ...
+    @staticmethod
+    def importFunc(pluginName: str, funcName: str) -> ServiceFuncType: ...
+    @staticmethod
+    def removeFunc(funcName: str) -> bool: ...
