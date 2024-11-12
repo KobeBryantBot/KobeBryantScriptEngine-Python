@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED 23)
 add_compile_options(
     /EHa
     /utf-8
-    -DNDEBUG
     /O2
 )
 
@@ -18,7 +17,7 @@ add_compile_definitions(
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 3.13.0 COMPONENTS Interpreter Development REQUIRED)
 
 set(RESOURCE_FILE ${PROJECT_SOURCE_DIR}/src/resource.rc)
 
