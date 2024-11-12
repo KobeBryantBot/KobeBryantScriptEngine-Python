@@ -114,10 +114,17 @@ void ScriptEventBusImpl::removePluginListeners(std::string const& plugin) {
 class ScriptEventBus {
 public:
     static ScriptListener add(std::string const& event, std::function<void(nlohmann::json const&)> func) {
-        return ScriptEventBusImpl::getInstance().add(event, std::move(func));
+        auto listener = ScriptEventBusImpl::getInstance().add(event, std::move(func));
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            ScriptEventBusImpl::getInstance().addPluginListener(*plugin, listener);
+        }
+        return listener;
     }
 
     static bool remove(ScriptListener const& listener) {
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            ScriptEventBusImpl::getInstance().removePluginListener(*plugin, listener);
+        }
         return ScriptEventBusImpl::getInstance().remove(std::move(listener));
     }
 };
@@ -129,20 +136,6 @@ void initEvent(py::module_& m) {
         .def_readonly("mType", &ScriptListener::mType);
 
     py::class_<ScriptEventBus>(m, "EventBus")
-        .def_static(
-            "add",
-            [](std::string const& event, std::function<void(nlohmann::json const&)> func) -> ScriptListener {
-                auto listener = ScriptEventBus::add(event, func);
-                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptEventBusImpl::getInstance().addPluginListener(*plugin, listener);
-                }
-                return listener;
-            }
-        )
-        .def_static("remove", [](ScriptListener const& listener) -> bool {
-            if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                ScriptEventBusImpl::getInstance().removePluginListener(*plugin, listener);
-            }
-            return ScriptEventBus::remove(listener);
-        });
+        .def_static("add", &ScriptEventBus::add)
+        .def_static("remove", &ScriptEventBus::remove);
 }
