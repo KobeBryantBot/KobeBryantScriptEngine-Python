@@ -6,6 +6,7 @@
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/ModuleUtils.hpp"
 #include "api/utils/StringUtils.hpp"
+#include <cstdio>
 
 // 必须释放全局 GIL 锁
 static std::unique_ptr<py::gil_scoped_release> mRelease = nullptr;
@@ -29,20 +30,77 @@ PythonPluginEngine::~PythonPluginEngine() {
 
 std::string PythonPluginEngine::getPluginType() const { return "script-python"; }
 
+std::pair<std::string, std::string> exec(const std::string& cmd) {
+    SECURITY_ATTRIBUTES sa;
+    sa.nLength              = sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle       = TRUE;
+    HANDLE hStdOutRd, hStdOutWr, hStdErrRd, hStdErrWr;
+    CreatePipe(&hStdOutRd, &hStdOutWr, &sa, 0);
+    CreatePipe(&hStdErrRd, &hStdErrWr, &sa, 0);
+    STARTUPINFOA si  = {0};
+    si.cb            = sizeof(STARTUPINFOA);
+    si.hStdOutput    = hStdOutWr;
+    si.hStdError     = hStdErrWr;
+    si.dwFlags      |= STARTF_USESTDHANDLES;
+    PROCESS_INFORMATION pi;
+    if (!CreateProcessA(NULL, const_cast<char*>(cmd.c_str()), NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+        return {};
+    }
+    CloseHandle(hStdOutWr);
+    CloseHandle(hStdErrWr);
+    std::string stdoutStr, stderrStr;
+    DWORD       dwRead;
+    CHAR        chBuf[4096];
+    if (hStdOutRd) {
+        while (ReadFile(hStdOutRd, chBuf, sizeof(chBuf), &dwRead, NULL) && dwRead != 0) {
+            stdoutStr.append(chBuf, dwRead);
+        }
+        CloseHandle(hStdOutRd);
+    }
+    if (hStdErrRd) {
+        while (ReadFile(hStdErrRd, chBuf, sizeof(chBuf), &dwRead, NULL) && dwRead != 0) {
+            stderrStr.append(chBuf, dwRead);
+        }
+        CloseHandle(hStdErrRd);
+    }
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return {stdoutStr, stderrStr};
+}
+
 bool PythonPluginEngine::loadPlugin(std::string const& plugin, std::filesystem::path const& entry) {
     try {
-        // 必须先上 GIL 锁
-        py::gil_scoped_acquire require{};
-        getLogger().info("engine.python.plugin.loading", {plugin});
-        // 安装pip包
+        // 先安装pip包依赖
         std::string requirePath = "./plugins/" + plugin + "/requirements.txt";
         if (std::filesystem::exists(requirePath)) {
             getLogger().info("engine.python.plugin.pip.loading", {plugin});
-            system((".\\plugins\\KobeBryantScriptEngine-Python\\Python313\\python.exe -m pip install "
-                    "--disable-pip-version-check -r "
-                    + requirePath)
-                       .c_str());
+            auto output = exec(
+                ".\\plugins\\KobeBryantScriptEngine-Python\\Python313\\python.exe -m pip install "
+                "--disable-pip-version-check -r "
+                + requirePath
+            );
+            auto outlines = utils::splitByPattern(output.first, "\n");
+            for (auto& line : outlines) {
+                if (!line.starts_with("Requirement already satisfied")) {
+                    getLogger().info(line);
+                }
+            }
+            if (!output.second.empty()) {
+                // pip包加载错误
+                getLogger().error("engine.python.plugin.load.failed", {plugin});
+                auto errlines = utils::splitByPattern(output.second, "\n");
+                for (auto& line : errlines) {
+                    getLogger().error(line);
+                }
+                return false;
+            }
+            getLogger().info("engine.python.plugin.pip.loaded", {plugin});
         }
+        // 必须先上 GIL 锁
+        py::gil_scoped_acquire require{};
+        getLogger().info("engine.python.plugin.loading", {plugin});
         // 注册模块路径到 sys.path
         py::module sys      = py::module::import("sys");
         py::object sys_path = sys.attr("path");

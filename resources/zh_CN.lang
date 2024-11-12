@@ -1,5 +1,7 @@
 engine.python.plugin.loading=正在加载Python插件 %s
 engine.python.plugin.pip.loading=正在加载Python插件 %s 的pip依赖包...
+engine.python.plugin.pip.loaded=已成功加载Python插件 %s 的pip依赖包
+engine.python.plugin.load.failed=无法加载Python插件 %s，加载pip包依赖发生错误
 engine.python.plugin.loaded=已成功加载Python插件 %s
 engine.python.plugin.load.exception=加载Python插件 %1$s 时捕获到异常:\n %2$s
 engine.python.plugin.load.unknownException=加载Python插件 %1$s 时出现未知异常
