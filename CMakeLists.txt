@@ -34,7 +34,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Module
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_SOURCE_DIR}/bin
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${PROJECT_SOURCE_DIR}/bin/DLL/${PROJECT_NAME}.dll
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/after_build.py
     COMMENT "Packing ${PROJECT_NAME} to ${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}"

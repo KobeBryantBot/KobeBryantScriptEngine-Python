@@ -20,10 +20,8 @@ def read_manifest(file_path):
 
 # 写入到manifest.json文件
 def write_to_manifest(data, folder_path):
-    # 如果文件夹已存在，先删除
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-    os.makedirs(folder_path, exist_ok=True)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)
     file_path = os.path.join(folder_path, "manifest.json")
 
     with open(file_path, "w", encoding="utf-8") as file:
@@ -74,8 +72,12 @@ def main():
 
     # 复制.dll文件到dllname文件夹
     shutil.copy(dll_file_path, folder_name)
-    
+
     shutil.copy("../python/KobeBryantAPI.pyi", "../bin")
+    if not os.path.exists("../bin/KobeBryantScriptEngine-Python/Python313"):
+        shutil.copytree(
+            "../runtime/Python313", "../bin/KobeBryantScriptEngine-Python/Python313"
+        )
 
 
 if __name__ == "__main__":
