@@ -214,6 +214,7 @@ class PacketSender:
     ) -> None: ...
 
 ServiceFuncType = Union[
+    None,
     int,
     bool,
     str,
@@ -226,7 +227,7 @@ class Service:
     @staticmethod
     def hasFunc(pluginName: str, funcName: str) -> bool: ...
     @staticmethod
-    def exportFunc(funcName: str, func: ServiceFuncType) -> bool: ...
+    def exportFunc(funcName: str, func: Callable[..., ServiceFuncType]) -> bool: ...
     @staticmethod
     def importFunc(pluginName: str, funcName: str) -> ServiceFuncType: ...
     @staticmethod
