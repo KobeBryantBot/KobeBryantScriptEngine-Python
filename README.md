@@ -2,7 +2,12 @@
 
 [![Latest Tag](https://img.shields.io/github/v/tag/KobeBryantBot/KobeBryantScriptEngine-Python?label=最新版本&style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases) 
 ![C++](https://img.shields.io/badge/C++-23-blue?logo=C%2B%2B&logoColor=41a3ed&style=for-the-badge)
-![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=edb641&style=for-the-badge)
+![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=edb641&style=for-the-badge)  
+[![Contributors](https://img.shields.io/github/contributors/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/graphs/contributors)
+[![Stars](https://img.shields.io/github/stars/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/stargazers)
+[![Forks](https://img.shields.io/github/forks/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/network/members)
+[![Issues](https://img.shields.io/github/issues/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/issues)
+[![License](https://img.shields.io/github/license/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](LICENSE)
   
 [![982714789](https://img.shields.io/badge/QQ交流群%20982714789-pink?style=for-the-badge&logo=tencent%20qq)](https://qm.qq.com/q/78bKZ18A9O)
 
