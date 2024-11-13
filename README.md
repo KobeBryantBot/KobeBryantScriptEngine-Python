@@ -1,15 +1,14 @@
 # KobeBryant 脚本引擎 - Python
 
 [![Latest Tag](https://img.shields.io/github/v/tag/KobeBryantBot/KobeBryantScriptEngine-Python?label=最新版本&style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases)
-[![Downloads](https://img.shields.io/github/downloads-pre/KobeBryantBot/KobeBryantScriptEngine-Python/latest/total?style=for-the-badge&logoColor=41a3ed&label=DOWNLOADS&color=2fffdc)
-](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases)    
+[![Downloads](https://img.shields.io/github/downloads/KobeBryantBot/KobeBryantScriptEngine-Python/total?style=for-the-badge&color=%2300ff00)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases)    
 ![C++](https://img.shields.io/badge/C++-23-blue?logo=C%2B%2B&logoColor=41a3ed&style=for-the-badge)
 ![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=edb641&style=for-the-badge)  
 [![Contributors](https://img.shields.io/github/contributors/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/graphs/contributors)
 [![Stars](https://img.shields.io/github/stars/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/stargazers)
 [![Forks](https://img.shields.io/github/forks/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/network/members)
 [![Issues](https://img.shields.io/github/issues/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/KobeBryantBot/KobeBryantScriptEngine-Python?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/issues)   
+[![Pull Requests](https://img.shields.io/github/issues-pr/KobeBryantBot/KobeBryantScriptEngine-Python?style=for-the-badge)](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/pulls)   
 [![License](https://img.shields.io/github/license/KobeBryantBot/KobeBryantScriptEngine-Python.svg?style=for-the-badge)](LICENSE)
   
 [![982714789](https://img.shields.io/badge/QQ交流群%20982714789-pink?style=for-the-badge&logo=tencent%20qq)](https://qm.qq.com/q/78bKZ18A9O)
@@ -22,7 +21,7 @@ KobeBryant框架没有要求插件必须使用 `C++` 编写。
 
 # 使用方法
 
-- 下载最新版，并解压，将整个文件夹放置到plugins文件夹中。确保放置目录结构如下所示。
+- 从 [GitHub Release](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases) 下载最新版，并解压，将整个文件夹放置到plugins文件夹中。确保放置目录结构如下所示。
 ```text
 ├── KobeBryant.exe
 └── plugins
@@ -96,14 +95,22 @@ KobeBryant框架没有要求插件必须使用 `C++` 编写。
 ## 代码示例
 ```Python
 # main.py
-from KobeBryantAPI import Logger  # type: ignore
+from KobeBryantAPI import Logger, EventBus, PacketSender, Message  # type: ignore
 
 logger = Logger()
+
+def handle(data):
+    group = data["group_id"]
+    sender = data["user_id"]
+    PacketSender.getInstance().sendGroupMessage(
+        group,
+        Message().at(sender).text(" Man! \nWhat can I say? \nMamba out!"),
+    )
 
 # 这里写插件加载时需要执行的操作
 def on_enable():
     logger.info("Python插件模板已加载")
-
+    EventBus.add("message.group.normal", handle)
 
 # 这里写插件加载时需要执行的操作
 def on_disable():
@@ -113,6 +120,37 @@ def on_disable():
     # 仅使用 KobeBryant 提供的 ScheduleAPI 添加的定时任务可以不手动清理，系统会自动清理
     logger.info("Python插件模板已卸载")
 ```
+- 如果你觉得这样监听事件麻烦，我们也提供了一个封装了系统事件的 `KobeBryantEvent` 模块，这是一个外部模块，你可以从 [GitHub Release](https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases) 下载并导入，然后使用它快速监听。  
+- 接下来，你可以这样编写代码
+```Python
+# main.py
+from KobeBryantAPI import Logger, PacketSender, Message  # type: ignore
+from KobeBryantEvent import KobeBryantEvent
+
+logger = Logger()
+
+@KobeBryantEvent.message.group.normal
+def handle(data):
+    group = data["group_id"]
+    sender = data["user_id"]
+    PacketSender.getInstance().sendGroupMessage(
+        group,
+        Message().at(sender).text(" Man! \nWhat can I say? \nMamba out!"),
+    )
+
+# 这里写插件加载时需要执行的操作
+def on_enable():
+    logger.info("Python插件模板已加载")
+
+# 这里写插件加载时需要执行的操作
+def on_disable():
+    # 卸载插件时，你需要释放插件的所有资源
+    # 你需要在这里执行清理全部后台任务，结束全部线程等操作
+    # 其中监听的事件、注册的命令可以不手动清理，系统会自动清理
+    # 仅使用 KobeBryant 提供的 ScheduleAPI 添加的定时任务可以不手动清理，系统会自动清理
+    logger.info("Python插件模板已卸载")
+```
+> 注意：此模块不是内置模块，因为这个模块无法包含插件发布的自定义事件，所以需要你手动导入。
 
 # 开源许可
 
