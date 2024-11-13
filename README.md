@@ -80,7 +80,7 @@ KobeBryant框架没有要求插件必须使用 `C++` 编写。
 
 ## 开发流程
 - 这里推荐使用 `Visual Studio Code`，并安装扩展 `Python` 和 `Pylance` 扩展
-- 克隆我们的 插件模板 ，向项目里面添加我们提供的 `KobeBryantAPI.pyi` 用于提供自动补全（模板里面已经自带）
+- 克隆我们的 [插件模板](https://github.com/KobeBryantBot/Python-Plugin-Template) ，向项目里面添加我们提供的 `KobeBryantAPI.pyi` 用于提供自动补全（模板里面已经自带）
 - 如果需要，你可以使用我们提供的 `KobeBryantEvent.py` 模块，更方便的监听事件。
 - 开始编写你的插件
 - 测试、发布插件
