@@ -137,3 +137,4 @@ def on_disable():
 
 这个项目之所以存在，离不开本项目所有的贡献者。
 
+![项目贡献者](https://contrib.rocks/image?repo=KobeBryantBot/KobeBryantScriptEngine-Python)
