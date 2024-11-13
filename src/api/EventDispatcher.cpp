@@ -1,4 +1,5 @@
 #include "EventDispatcher.hpp"
+#include "api/event/CustomEvent.hpp"
 
 Logger logger("KobeBryantScriptEngine-Python");
 
@@ -127,8 +128,15 @@ public:
         }
         return ScriptEventBusImpl::getInstance().remove(std::move(listener));
     }
-};
 
+    static void emit(std::string const& event, nlohmann::json const& data) {
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            ScriptEventBusImpl::getInstance().publish(event, data);
+            auto ev = CustomEvent(event, data, *plugin);
+            EventBus::getInstance().publish(ev);
+        }
+    }
+};
 
 void initEvent(py::module_& m) {
     py::class_<ScriptListener>(m, "Listener")
@@ -137,5 +145,6 @@ void initEvent(py::module_& m) {
 
     py::class_<ScriptEventBus>(m, "EventBus")
         .def_static("add", &ScriptEventBus::add)
-        .def_static("remove", &ScriptEventBus::remove);
+        .def_static("remove", &ScriptEventBus::remove)
+        .def_static("emit", &ScriptEventBus::emit);
 }

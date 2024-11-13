@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, List, Union, Callable, Dict, overload, override
+from typing import Optional, List, Union, Callable, Dict, overload, override, Any
 
 class CommandRegistry:
     @staticmethod
@@ -15,9 +15,11 @@ class Listener:
 
 class EventBus:
     @staticmethod
-    def add(event: str, callback: Callable[[Dict], None]) -> Listener: ...
+    def add(event: str, callback: Callable[[Dict[str, Any]], None]) -> Listener: ...
     @staticmethod
     def remove(listener: Listener) -> bool: ...
+    @staticmethod
+    def emit(event: str, data: Dict[str, Any]) -> Listener: ...
 
 class Logger:
     class LogLevel(Enum):
@@ -97,7 +99,7 @@ class PacketSender:
     def sendRawPacket(
         self,
         packet: str,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
@@ -133,33 +135,33 @@ class PacketSender:
     def getMessage(self, messageId: int) -> None: ...
     def getGroupsListInfo(
         self,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getForwardMessage(
         self,
         messageId: int,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getLoginInfo(
         self,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getStrangerInfo(
         self,
         target: int,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getFriendsListInfo(
         self,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
@@ -172,7 +174,7 @@ class PacketSender:
     def getGroupInfo(
         self,
         groupId: int,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
@@ -180,14 +182,14 @@ class PacketSender:
         self,
         groupId: int,
         target: int,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
     def getGroupMembersListInfo(
         self,
         groupId: int,
-        callback: Callable[[Dict], None],
+        callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
