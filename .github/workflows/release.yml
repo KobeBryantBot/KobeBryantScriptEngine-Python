@@ -38,6 +38,19 @@ jobs:
           name: Python313-windows-x64
           path: |
             ${{ github.workspace }}\runtime\Python313-windows-x64.zip
+      - name: Upload KobeBryantAPI.pyi
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantAPI.pyi
+          path: |
+            ${{ github.workspace }}\python\KobeBryantAPI.pyi
+      - name: Upload KobeBryantEvent.py
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantAPI.pyi
+          path: |
+            ${{ github.workspace }}\python\KobeBryantEvent.py
+            
   
   upload-to-release:
     needs:
@@ -48,6 +61,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download KobeBryantAPI.pyi artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: KobeBryantAPI.pyi
+          path: python-modules/
+
+      - name: Download KobeBryantEvent.py artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: KobeBryantEvent.py
+          path: python-modules/
   
       - name: Download windows-x64 artifact
         uses: actions/download-artifact@v3
@@ -79,4 +104,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
+            python-modules/KobeBryantAPI.pyi
+            python-modules/KobeBryantEvent.py
             KobeBryantScriptEngine-Python-windows-x64.zip

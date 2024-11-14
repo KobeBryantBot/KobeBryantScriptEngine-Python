@@ -31,3 +31,15 @@ jobs:
           name: KobeBryantScriptEngine-Python-windows-x64
           path: |
             ${{ github.workspace }}\bin\KobeBryantScriptEngine-Python\
+      - name: Upload KobeBryantAPI.pyi
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantAPI.pyi
+          path: |
+            ${{ github.workspace }}\python\KobeBryantAPI.pyi
+      - name: Upload KobeBryantEvent.py
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantAPI.pyi
+          path: |
+            ${{ github.workspace }}\python\KobeBryantEvent.py
