@@ -68,7 +68,7 @@ jobs:
       - name: Archive Windows-x64 directory
         run: |
           cd python-win-x64/
-          unzip Python313-windows-x64.zip -d release-win-x64
+          unzip Python313-windows-x64.zip -d ../release-win-x64
           cd ..
           cd release-win-x64/
           zip -r ../KobeBryantScriptEngine-Python-windows-x64.zip *
