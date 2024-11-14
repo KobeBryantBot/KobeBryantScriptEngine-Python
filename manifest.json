@@ -1,6 +1,6 @@
 {
-    "name": "{PluginName}",
-    "entry": "{PluginName}.dll",
+    "name": "KobeBryantScriptEngine-Python",
+    "entry": "KobeBryantScriptEngine-Python.dll",
     "type": "native",
     "preload": [
         "Python313/python313.dll"

@@ -1,0 +1,29 @@
+name: Build
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.2.0
+        with:
+          fetch-depth: 1
+          submodules: 'true'
+      - name: Configure CMake (MSVC)
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=MinSizeRel
+        shell: cmd
+      - name: Build all
+        run: |
+          cmake --build ${{github.workspace}}/build --config MinSizeRel
+        shell: cmd
+      - name: Upload Binary
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantScriptEngine-Python-windows-x64
+          path: |
+            ${{ github.workspace }}\bin\KobeBryantScriptEngine-Python\

@@ -1,0 +1,78 @@
+name: Publish Release
+on:
+  release:
+    types:
+    - published
+  
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.2.0
+        with:
+          fetch-depth: 1
+          submodules: 'true'
+      - name: Configure CMake (MSVC)
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=MinSizeRel
+        shell: cmd
+      - name: Build all
+        run: |
+          cmake --build ${{github.workspace}}/build --config MinSizeRel
+        shell: cmd
+      - name: Upload Binary
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: KobeBryantScriptEngine-Python-windows-x64
+          path: |
+            ${{ github.workspace }}\bin\KobeBryantScriptEngine-Python\
+      - name: Upload Runtime
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: Python313-windows-x64
+          path: |
+            ${{ github.workspace }}\runtime\Python313-windows-x64.zip
+  
+  upload-to-release:
+    needs:
+      - build
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      - name: Download windows-x64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: KobeBryantScriptEngine-Python-windows-x64
+          path: release-win-x64/
+
+      - name: Download Python313 windows-x64 runtime
+        uses: actions/download-artifact@v3
+        with:
+          name: Python313-windows-x64
+          path: python-win-x64/
+  
+      - name: Copy additional files
+        run: |
+          cp LICENSE README.md release-win-x64/
+  
+      - name: Archive Windows-x64 directory
+        run: |
+          cd python-win-x64/
+          unzip Python313-windows-x64.zip -d release-win-x64
+          cd ..
+          cd release-win-x64/
+          zip -r ../KobeBryantScriptEngine-Python-windows-x64.zip *
+          cd ..
+  
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            KobeBryantScriptEngine-Python-windows-x64.zip
