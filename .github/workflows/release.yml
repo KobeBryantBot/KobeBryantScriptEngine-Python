@@ -14,6 +14,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'true'
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Configure CMake (MSVC)
         run: |
           cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=MinSizeRel
