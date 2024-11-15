@@ -2,6 +2,7 @@
 #include "../core/PythonPluginEngine.hpp"
 #include "api/EventBus.hpp"
 #include "api/Logger.hpp"
+#include "api/event/CustomEvent.hpp"
 #include "api/event/PacketEvent.hpp"
 #include "api/utils/StringUtils.hpp"
 #include "magic_enum/magic_enum.hpp"
@@ -23,20 +24,22 @@ struct ScriptListener {
 };
 
 class ScriptEventBusImpl {
-    std::map<ScriptListener, std::function<void(nlohmann::json const&)>> mListeners;
-    uint64_t                                                             mNextId = 0;
-    std::unordered_map<std::string, std::set<ScriptListener>>            mPluginListeners;
+    std::map<ScriptListener, std::function<void(CustomEvent&)>> mCallbacks;
+    std::map<ScriptListener, uint32_t>                          mListenerMap;
+    std::map<uint32_t, std::set<ScriptListener>>                mListenerPriority;
+    uint64_t                                                    mNextId = 0;
+    std::unordered_map<std::string, std::set<ScriptListener>>   mPluginListeners;
 
 public:
     ScriptEventBusImpl();
 
     static ScriptEventBusImpl& getInstance();
 
-    ScriptListener add(std::string const& event, std::function<void(nlohmann::json const&)> func);
+    ScriptListener add(std::string const& event, std::function<void(CustomEvent&)> func, uint32_t priority);
 
     bool remove(ScriptListener const& listener);
 
-    void publish(std::string const& event, nlohmann::json const& data);
+    void publish(std::string const& event, CustomEvent& data);
 
     void addPluginListener(std::string const& plugin, ScriptListener const& listener);
 
