@@ -1,78 +1,61 @@
-#include "Schedule.hpp"
+#include "api/Schedule.hpp"
 #include "../core/PythonPluginEngine.hpp"
+#include <pybind11/chrono.h>
+#include <pybind11/complex.h>
+#include <pybind11/embed.h>
+#include <pybind11/functional.h>
+#include <pybind11/stl.h>
 
-size_t ScriptSchedule::addDelayTask(int delay, std::function<void()> func) {
-    return Schedule::addDelayTask(std::chrono::seconds(delay), func);
-}
+namespace py = pybind11;
 
-size_t ScriptSchedule::addRepeatTask(int delay, std::function<void()> func, bool immediately) {
-    return Schedule::addRepeatTask(std::chrono::seconds(delay), func, immediately);
-}
+class ScriptSchedule : public Schedule {
+    friend Schedule;
 
-size_t ScriptSchedule::addRepeatTask(int delay, std::function<void()> func, bool immediately, uint64_t times) {
-    return Schedule::addRepeatTask(std::chrono::seconds(delay), func, immediately, times);
-}
-
-bool ScriptSchedule::cancelTask(size_t id) { return Schedule::cancelTask(id); }
-
-ScriptSchedule& ScriptSchedule::getInstance() {
-    static std::unique_ptr<ScriptSchedule> instance;
-    if (!instance) {
-        instance = std::make_unique<ScriptSchedule>();
+public:
+    static size_t addDelayTask(int delay, std::function<void()> func) {
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            return addDelay(*plugin, std::chrono::milliseconds(delay), func);
+        }
+        return -1;
     }
-    return *instance;
-}
 
-void ScriptSchedule::addPluginTask(std::string const& plugin, size_t taskId) { mPluginTasks[plugin].insert(taskId); }
-
-void ScriptSchedule::removePluginTask(std::string const& plugin, size_t taskId) { mPluginTasks[plugin].erase(taskId); }
-
-void ScriptSchedule::removePluginTasks(std::string const& plugin) {
-    for (auto& taskId : mPluginTasks[plugin]) {
-        cancelTask(taskId);
+    static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately) {
+        if (immediately) {
+            func();
+        }
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            return addRepeat(*plugin, std::chrono::seconds(delay), func);
+        }
+        return -1;
     }
-    mPluginTasks.erase(plugin);
-}
+
+    static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately, uint64_t times) {
+        if (immediately) {
+            func();
+            times--;
+        }
+        if (times >= 1) {
+            if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+                return addRepeat(*plugin, std::chrono::seconds(delay), func, times);
+            }
+        }
+        return -1;
+    }
+};
 
 void initSchedule(py::module_& m) {
     py::class_<ScriptSchedule>(m, "Schedule")
-        .def_static(
-            "addDelayTask",
-            [](int delay, std::function<void()> task) -> size_t {
-                auto taskId = ScriptSchedule::addDelayTask(delay, task);
-                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptSchedule::getInstance().addPluginTask(*plugin, taskId);
-                }
-                return taskId;
-            }
-        )
+        .def_static("addDelayTask", &ScriptSchedule::addDelayTask)
         .def_static(
             "addRepeatTask",
-            [](int delay, std::function<void()> task, bool immediately) -> size_t {
-                auto taskId = ScriptSchedule::addRepeatTask(delay, task, immediately);
-                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptSchedule::getInstance().addPluginTask(*plugin, taskId);
-                }
-                return taskId;
-            },
+            py::overload_cast<int, std::function<void()>, bool>(&ScriptSchedule::addRepeatTask),
             py::arg(),
             py::arg(),
             py::arg() = false
         )
         .def_static(
             "addRepeatTask",
-            [](int delay, std::function<void()> task, bool immediately, uint64_t times) -> size_t {
-                auto taskId = ScriptSchedule::addRepeatTask(delay, task, immediately, times);
-                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptSchedule::getInstance().addPluginTask(*plugin, taskId);
-                }
-                return taskId;
-            }
+            py::overload_cast<int, std::function<void()>, bool, uint64_t>(&ScriptSchedule::addRepeatTask)
         )
-        .def_static("cancelTask", [](size_t taskId) -> bool {
-            if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                ScriptSchedule::getInstance().removePluginTask(*plugin, taskId);
-            }
-            return ScriptSchedule::cancelTask(taskId);
-        });
+        .def_static("cancelTask", &ScriptSchedule::cancelTask);
 }

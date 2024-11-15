@@ -1,6 +1,5 @@
 #include "PythonPluginEngine.hpp"
 #include "../api/EventDispatcher.hpp"
-#include "../api/Schedule.hpp"
 #include "../resource.hpp"
 #include "api/utils/FileUtils.hpp"
 #include "api/utils/ModuleUtils.hpp"
@@ -141,7 +140,6 @@ bool PythonPluginEngine::unloadPlugin(std::string const& plugin) {
         getLogger().info("engine.python.plugin.unloading", {plugin});
         // 清理资源
         ScriptEventBusImpl::getInstance().removePluginListeners(plugin);
-        ScriptSchedule::getInstance().removePluginTasks(plugin);
         // 必须先上 GIL 锁
         py::gil_scoped_acquire require{};
         // 禁用插件
