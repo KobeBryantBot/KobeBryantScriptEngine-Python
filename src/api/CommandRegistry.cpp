@@ -39,7 +39,7 @@ void initCommandRegistry(py::module_& m) {
                 if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
                     ScriptCommandManager::getInstance().addPluginCommand(*plugin, cmd);
                 }
-                return CommandRegistry::getInstance().registerCommand(cmd, std::move(callback));
+                return CommandRegistry::getInstance().registerSimpleCommand(cmd, std::move(callback));
             }
         )
         .def_static(

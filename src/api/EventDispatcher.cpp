@@ -16,10 +16,9 @@ ScriptEventBusImpl::ScriptEventBusImpl() {
                 switch (utils::doHash(post_type)) {
                 case utils::doHash("meta_event"): {
                     std::string meta_event_type = packet["meta_event_type"];
-                    return ScriptEventBusImpl::getInstance().publish(
-                        fmt::format("{}.{}", post_type, meta_event_type),
-                        packet
-                    );
+                    auto        eventName       = fmt::format("{}.{}", post_type, meta_event_type);
+                    auto        event           = CustomEvent(eventName, packet);
+                    return ScriptEventBusImpl::getInstance().publish(eventName, event);
                 }
                 case utils::doHash("message"): {
                     std::string message_type = packet["message_type"];
@@ -30,24 +29,21 @@ ScriptEventBusImpl::ScriptEventBusImpl() {
                     utils::ReplaceStr(rawMessage, "&#44;", ",");
                     utils::ReplaceStr(rawMessage, "&amp;", "&");
                     packet["raw_message"] = rawMessage;
-                    return ScriptEventBusImpl::getInstance().publish(
-                        fmt::format("{}.{}.{}", post_type, message_type, sub_type),
-                        packet
-                    );
+                    auto eventName        = fmt::format("{}.{}.{}", post_type, message_type, sub_type);
+                    auto event            = CustomEvent(eventName, packet);
+                    return ScriptEventBusImpl::getInstance().publish(eventName, event);
                 }
                 case utils::doHash("notice"): {
                     std::string notice_type = packet["notice_type"];
-                    return ScriptEventBusImpl::getInstance().publish(
-                        fmt::format("{}.{}", post_type, notice_type),
-                        packet
-                    );
+                    auto        eventName   = fmt::format("{}.{}", post_type, notice_type);
+                    auto        event       = CustomEvent(eventName, packet);
+                    return ScriptEventBusImpl::getInstance().publish(eventName, event);
                 }
                 case utils::doHash("request"): {
                     std::string request_type = packet["request_type"];
-                    return ScriptEventBusImpl::getInstance().publish(
-                        fmt::format("{}.{}", post_type, request_type),
-                        packet
-                    );
+                    auto        eventName    = fmt::format("{}.{}", post_type, request_type);
+                    auto        event        = CustomEvent(eventName, packet);
+                    return ScriptEventBusImpl::getInstance().publish(eventName, event);
                 }
                 }
             }
@@ -67,27 +63,38 @@ ScriptEventBusImpl& ScriptEventBusImpl::getInstance() {
     return *instance;
 }
 
-ScriptListener ScriptEventBusImpl::add(std::string const& event, std::function<void(nlohmann::json const&)> func) {
+ScriptListener
+ScriptEventBusImpl::add(std::string const& event, std::function<void(CustomEvent&)> func, uint32_t priority) {
     auto id = mNextId;
     mNextId++;
-    auto listener        = ScriptListener(id, event);
-    mListeners[listener] = std::move(func);
+    auto listener          = ScriptListener(id, event);
+    mCallbacks[listener]   = std::move(func);
+    mListenerMap[listener] = priority;
+    mListenerPriority[priority].insert(listener);
     return listener;
 }
 
 bool ScriptEventBusImpl::remove(ScriptListener const& listener) {
-    if (mListeners.contains(listener)) {
-        mListeners.erase(listener);
+    if (mCallbacks.contains(listener)) {
+        mCallbacks.erase(listener);
+        auto priority = mListenerMap[listener];
+        mListenerPriority[priority].erase(listener);
+        mListenerMap.erase(listener);
         return true;
     }
     return false;
 }
 
-void ScriptEventBusImpl::publish(std::string const& event, nlohmann::json const& data) {
+void ScriptEventBusImpl::publish(std::string const& event, CustomEvent& ev) {
     try {
-        for (auto& [listener, func] : mListeners) {
-            if (listener.mType == event && func) {
-                func(data);
+        for (auto& [priority, listeners] : mListenerPriority) {
+            for (auto& listener : listeners) {
+                if (auto& callback = mCallbacks[listener]) {
+                    if (listener.mType == event) {
+                        callback(ev);
+                        if (ev.isPassingBlocked()) return;
+                    }
+                }
             }
         }
     } catch (const std::exception& e) {
@@ -114,8 +121,8 @@ void ScriptEventBusImpl::removePluginListeners(std::string const& plugin) {
 
 class ScriptEventBus {
 public:
-    static ScriptListener add(std::string const& event, std::function<void(nlohmann::json const&)> func) {
-        auto listener = ScriptEventBusImpl::getInstance().add(event, std::move(func));
+    static ScriptListener add(std::string const& event, std::function<void(CustomEvent&)> func, uint32_t priority) {
+        auto listener = ScriptEventBusImpl::getInstance().add(event, std::move(func), priority);
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().addPluginListener(*plugin, listener);
         }
@@ -129,11 +136,10 @@ public:
         return ScriptEventBusImpl::getInstance().remove(std::move(listener));
     }
 
-    static void emit(std::string const& event, nlohmann::json const& data) {
+    static void emit(std::string const& event, CustomEvent& data) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().publish(event, data);
-            auto ev = CustomEvent(event, data, *plugin);
-            EventBus::getInstance().publish(ev);
+            EventBus::getInstance().publish(data);
         }
     }
 };
@@ -143,8 +149,21 @@ void initEvent(py::module_& m) {
         .def_readonly("mId", &ScriptListener::mId)
         .def_readonly("mType", &ScriptListener::mType);
 
+    py::class_<CustomEvent>(m, "Event")
+        .def_static(
+            "newEvent",
+            [](std::string const& event, nlohmann::json const& data) -> CustomEvent {
+                if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+                    return CustomEvent(event, data, *plugin);
+                }
+                return CustomEvent("invalid_event", nlohmann::json::object(), "invalid_plugin");
+            }
+        )
+        .def_readwrite("mEventData", &CustomEvent::mEventData)
+        .def("block_pass", &CustomEvent::block_pass);
+
     py::class_<ScriptEventBus>(m, "EventBus")
-        .def_static("add", &ScriptEventBus::add)
+        .def_static("add", &ScriptEventBus::add, py::arg(), py::arg(), py::arg() = 500)
         .def_static("remove", &ScriptEventBus::remove)
         .def_static("emit", &ScriptEventBus::emit);
 }
