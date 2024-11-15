@@ -1,5 +1,5 @@
-#include "CommandRegistry.hpp"
 #include "../core/PythonPluginEngine.hpp"
+#include <api/CommandRegistry.hpp>
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
 #include <pybind11/embed.h>
@@ -8,50 +8,55 @@
 
 namespace py = pybind11;
 
-ScriptCommandManager& ScriptCommandManager::getInstance() {
-    static std::unique_ptr<ScriptCommandManager> instance;
-    if (!instance) {
-        instance = std::make_unique<ScriptCommandManager>();
+CommandRegistry::CommandRegistry() = default;
+
+class ScriptCommandRegistry : public CommandRegistry {
+    friend CommandRegistry;
+
+public:
+    static ScriptCommandRegistry& getInstance() {
+        static std::unique_ptr<ScriptCommandRegistry> instance;
+        if (!instance) {
+            instance = std::make_unique<ScriptCommandRegistry>();
+        }
+        return *instance;
     }
-    return *instance;
-}
 
-void ScriptCommandManager::addPluginCommand(std::string const& plugin, std::string const& cmd) {
-    mPluginCommands[plugin].insert(cmd);
-}
-
-void ScriptCommandManager::removePluginCommand(std::string const& plugin, std::string const& cmd) {
-    mPluginCommands[plugin].erase(cmd);
-}
-
-void ScriptCommandManager::removePluginCommands(std::string const& plugin) {
-    for (auto& cmd : mPluginCommands[plugin]) {
-        CommandRegistry::getInstance().unregisterCommand(cmd);
+    bool _registerSimpleCommand(
+        const std::string&                                   plugin,
+        const std::string&                                   cmd,
+        std::function<void(const std::vector<std::string>&)> callback
+    ) {
+        return registerSimpleCommand(plugin, cmd, callback);
     }
-    mPluginCommands.erase(plugin);
-}
+
+    bool _unregisterCommand(const std::string& plugin, const std::string& cmd) {
+        return unregisterCommand(plugin, cmd);
+    }
+};
 
 void initCommandRegistry(py::module_& m) {
-    py::class_<CommandRegistry>(m, "CommandRegistry")
+    py::class_<ScriptCommandRegistry>(m, "CommandRegistry")
         .def_static(
-            "registerCommand",
+            "registerSimpleCommand",
             [](std::string const& cmd, std::function<void(std::vector<std::string> const&)> callback) {
                 if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptCommandManager::getInstance().addPluginCommand(*plugin, cmd);
+                    return ScriptCommandRegistry::getInstance()
+                        ._registerSimpleCommand(*plugin, cmd, std::move(callback));
                 }
-                return CommandRegistry::getInstance().registerSimpleCommand(cmd, std::move(callback));
+                return false;
             }
         )
         .def_static(
             "unregisterCommand",
             [](std::string const cmd) -> bool {
                 if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                    ScriptCommandManager::getInstance().removePluginCommand(*plugin, cmd);
+                    return ScriptCommandRegistry::getInstance()._unregisterCommand(*plugin, cmd);
                 }
-                return CommandRegistry::getInstance().unregisterCommand(cmd);
+                return false;
             }
         )
         .def_static("executeCommand", [](std::string const cmd) {
-            CommandRegistry::getInstance().executeCommand(cmd);
+            ScriptCommandRegistry::getInstance().executeCommand(cmd);
         });
 }

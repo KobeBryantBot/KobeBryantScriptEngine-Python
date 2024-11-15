@@ -3,7 +3,9 @@ from typing import Optional, List, Union, Callable, Dict, overload, override, An
 
 class CommandRegistry:
     @staticmethod
-    def registerCommand(cmd: str, callback: Callable[[List[str]], None]) -> bool: ...
+    def registerSimpleCommand(
+        cmd: str, callback: Callable[[List[str]], None]
+    ) -> bool: ...
     @staticmethod
     def unregisterCommand(cmd: str) -> bool: ...
     @staticmethod
