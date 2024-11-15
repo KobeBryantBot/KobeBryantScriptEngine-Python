@@ -41,6 +41,13 @@ public:
         }
         return -1;
     }
+
+    static bool cancelTask(size_t id) {
+        if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
+            return cancel(*plugin, id);
+        }
+        return false;
+    }
 };
 
 void initSchedule(py::module_& m) {
