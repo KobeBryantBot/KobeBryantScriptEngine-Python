@@ -21,7 +21,9 @@ class Event:
 
 class EventBus:
     @staticmethod
-    def add(event: str, callback: Callable[[Event], None]) -> Listener: ...
+    def add(
+        event: str, callback: Callable[[Event], None], priority: int = 500
+    ) -> Listener: ...
     @staticmethod
     def remove(listener: Listener) -> bool: ...
     @staticmethod

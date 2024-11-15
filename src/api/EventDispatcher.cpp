@@ -163,7 +163,7 @@ void initEvent(py::module_& m) {
         .def("block_pass", &CustomEvent::block_pass);
 
     py::class_<ScriptEventBus>(m, "EventBus")
-        .def_static("add", &ScriptEventBus::add)
+        .def_static("add", &ScriptEventBus::add, py::arg(), py::arg(), py::arg() = 500)
         .def_static("remove", &ScriptEventBus::remove)
         .def_static("emit", &ScriptEventBus::emit);
 }
