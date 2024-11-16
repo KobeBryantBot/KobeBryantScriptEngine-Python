@@ -1,7 +1,7 @@
 #include "EventDispatcher.hpp"
 #include "api/event/CustomEvent.hpp"
 
-Logger logger("KobeBryantScriptEngine-Python");
+Logger logger{};
 
 bool ScriptListener::operator<(const ScriptListener& rhs) const { return mId < rhs.mId; }
 bool ScriptListener::operator==(const ScriptListener& rhs) const { return mId == rhs.mId; }
