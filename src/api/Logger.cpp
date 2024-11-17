@@ -17,11 +17,12 @@ public:
     }
     ScriptLogger(std::string const& title) : Logger(title) {}
 
-    void fatal(std::string const& content) { return printStr(LogLevel::Fatal, content); }
-    void error(std::string const& content) { return printStr(LogLevel::Error, content); }
-    void warn(std::string const& content) { return printStr(LogLevel::Warn, content); }
-    void info(std::string const& content) { return printStr(LogLevel::Info, content); }
-    void debug(std::string const& content) { return printStr(LogLevel::Debug, content); }
+    void log(LogLevel level, std::string const& content) { return printView(level, content); }
+    void fatal(std::string const& content) { return printView(LogLevel::Fatal, content); }
+    void error(std::string const& content) { return printView(LogLevel::Error, content); }
+    void warn(std::string const& content) { return printView(LogLevel::Warn, content); }
+    void info(std::string const& content) { return printView(LogLevel::Info, content); }
+    void debug(std::string const& content) { return printView(LogLevel::Debug, content); }
 };
 
 void initLogger(py::module_& m) {
@@ -31,6 +32,7 @@ void initLogger(py::module_& m) {
         .def("setTitle", &ScriptLogger::setTitle)
         .def("setLevel", &ScriptLogger::setLevel)
         .def("setFile", &ScriptLogger::setFile)
+        .def("log", &ScriptLogger::log)
         .def("fatal", &ScriptLogger::fatal)
         .def("error", &ScriptLogger::error)
         .def("warn", &ScriptLogger::warn)
