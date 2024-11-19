@@ -72,13 +72,15 @@ KobeBryant框架没有要求插件必须使用 `C++` 编写。
 ```json
 // manifest.json
 {
-    "name": "PluginName",       // 必需：插件名，必须和文件夹名称一致
-    "entry": "PluginEntry.py",  // 必需：插件入口文件
-    "type": "script-python",    // 必需：需要通过Python引擎加载的Python插件必须填"script-python"
-    "preload": [],              // 可选：需要预加载的DLL
-    "passive": false,           // 可选：如果插件不被其它插件依赖，是否跳过加载（一般纯前置插件才填写true）
-    "dependence": [],           // 可选：插件依赖项（硬依赖）
-    "optional_dependence": [],  // 可选：插件依赖项（可选依赖）
+    "name": "PluginName",        // 必需：插件名，必须和文件夹名称一致
+    "entry": "PluginEntry.py",   // 必需：插件入口文件
+    "type": "script-python",     // 必需：需要通过Python引擎加载的Python插件必须填"script-python"
+    "version": "v1.0.0",         // 可选：（默认是"v0.0.0"）插件的版本
+    "description": "Manba out!", // 可选：插件描述
+    "preload": [],               // 可选：需要预加载的DLL
+    "passive": false,            // 可选：如果插件不被其它插件依赖，是否跳过加载（一般纯前置插件才填写true）
+    "dependence": [],            // 可选：插件依赖项（硬依赖）
+    "optional_dependence": [],   // 可选：插件依赖项（可选依赖）
 }
 ```
 
