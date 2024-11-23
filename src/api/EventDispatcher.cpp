@@ -133,7 +133,7 @@ public:
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().removePluginListener(*plugin, listener);
         }
-        return ScriptEventBusImpl::getInstance().remove(std::move(listener));
+        return ScriptEventBusImpl::getInstance().remove(listener);
     }
 
     static void emit(std::string const& event, CustomEvent& data) {
