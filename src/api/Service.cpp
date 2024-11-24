@@ -7,31 +7,22 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11_json/pybind11_json.hpp>
 #include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 
 namespace py = pybind11;
 
-using ScriptTypeBase = std::variant<std::monostate, int64_t, double, std::string, bool>;
-using ScriptType     = std::variant<
-        std::monostate,
-        int64_t,
-        double,
-        std::string,
-        bool,
-        std::vector<ScriptTypeBase>,
-        std::unordered_map<std::string, ScriptTypeBase>>;
-
 class ScriptService : public Service {
     friend Service;
+
+    using ScriptType = std::variant<std::monostate, int64_t, double, std::string, bool, nlohmann::json>;
 
 public:
     static py::object any_to_py(std::any const& any_value) {
         auto& type = any_value.type();
-        if (type == typeid(ScriptType)) {
-            return py::cast(std::any_cast<ScriptType>(any_value));
-        } else if (type == typeid(void) || type == typeid(std::nullptr_t)) {
+        if (type == typeid(void) || type == typeid(std::nullptr_t)) {
             return py::none();
         } else if (type == typeid(int8_t)) {
             return py::cast(std::any_cast<int8_t>(any_value));
@@ -57,8 +48,10 @@ public:
             return py::cast(std::any_cast<std::string>(any_value));
         } else if (type == typeid(bool)) {
             return py::cast(std::any_cast<bool>(any_value));
+        } else if (type == typeid(nlohmann::json)) {
+            return py::cast(std::any_cast<nlohmann::json>(any_value));
         } else {
-            throw std::runtime_error("Unsupported C++ type in function result");
+            throw std::runtime_error("ScriptEngine received unsupported C++ type!");
         }
     }
 
@@ -71,10 +64,8 @@ public:
             return std::any(std::get<std::string>(var));
         } else if (std::holds_alternative<bool>(var)) {
             return std::any(std::get<bool>(var));
-        } else if (std::holds_alternative<std::vector<ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::vector<ScriptTypeBase>>(var));
-        } else if (std::holds_alternative<std::unordered_map<std::string, ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::unordered_map<std::string, ScriptTypeBase>>(var));
+        } else if (std::holds_alternative<nlohmann::json>(var)) {
+            return std::any(std::get<nlohmann::json>(var));
         } else {
             return std::any();
         }
