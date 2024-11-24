@@ -13,6 +13,16 @@
 
 namespace py = pybind11;
 
+using ScriptTypeBase = std::variant<std::monostate, int64_t, double, std::string, bool>;
+using ScriptType     = std::variant<
+        std::monostate,
+        int64_t,
+        double,
+        std::string,
+        bool,
+        std::vector<ScriptTypeBase>,
+        std::unordered_map<std::string, ScriptTypeBase>>;
+
 class ScriptService : public Service {
     friend Service;
 
@@ -52,7 +62,7 @@ public:
         }
     }
 
-    static std::any variant_to_any(Service::ScriptType const& var) {
+    static std::any variant_to_any(ScriptType const& var) {
         if (std::holds_alternative<int64_t>(var)) {
             return std::any(std::get<int64_t>(var));
         } else if (std::holds_alternative<double>(var)) {
@@ -61,10 +71,10 @@ public:
             return std::any(std::get<std::string>(var));
         } else if (std::holds_alternative<bool>(var)) {
             return std::any(std::get<bool>(var));
-        } else if (std::holds_alternative<std::vector<Service::ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::vector<Service::ScriptTypeBase>>(var));
-        } else if (std::holds_alternative<std::unordered_map<std::string, Service::ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::unordered_map<std::string, Service::ScriptTypeBase>>(var));
+        } else if (std::holds_alternative<std::vector<ScriptTypeBase>>(var)) {
+            return std::any(std::get<std::vector<ScriptTypeBase>>(var));
+        } else if (std::holds_alternative<std::unordered_map<std::string, ScriptTypeBase>>(var)) {
+            return std::any(std::get<std::unordered_map<std::string, ScriptTypeBase>>(var));
         } else {
             return std::any();
         }
@@ -82,10 +92,10 @@ public:
             auto func = [py_func](std::vector<std::any> const& args) -> std::any {
                 py::tuple args_tuple(args.size());
                 for (size_t i = 0; i < args.size(); ++i) {
-                    args_tuple[i] = py::cast(cast_type<ScriptType>(args[i]));
+                    args_tuple[i] = any_to_py(args[i]);
                 }
                 py::object result = py_func(*args_tuple);
-                return std::any(py::cast<ScriptType>(result));
+                return variant_to_any(py::cast<ScriptType>(result));
             };
             return exportAnyFunc(*plugin, funcName, func);
         }
@@ -96,24 +106,11 @@ public:
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             auto func = importAnyFunc(pluginName, funcName);
             return py::cpp_function([func](py::args args) -> py::object {
-                std::any result;
-                try {
-                    std::vector<std::any> cxx_args;
-                    for (auto& arg : args) {
-                        cxx_args.push_back(std::any(py::cast<ScriptType>(arg)));
-                    }
-                    result = func(cxx_args);
-                } catch (std::exception const& e) {
-                    try {
-                        std::vector<std::any> cxx_args;
-                        for (auto& arg : args) {
-                            cxx_args.push_back(variant_to_any(py::cast<ScriptType>(arg)));
-                        }
-                        result = func(cxx_args);
-                    } catch (...) {
-                        throw std::runtime_error(e.what());
-                    }
+                std::vector<std::any> cxx_args;
+                for (auto& arg : args) {
+                    cxx_args.push_back(variant_to_any(py::cast<ScriptType>(arg)));
                 }
+                auto result = func(cxx_args);
                 return any_to_py(result);
             });
         }
