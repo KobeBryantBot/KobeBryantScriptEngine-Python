@@ -24,26 +24,10 @@ public:
         auto& type = any_value.type();
         if (type == typeid(void) || type == typeid(std::nullptr_t)) {
             return py::none();
-        } else if (type == typeid(int8_t)) {
-            return py::cast(std::any_cast<int8_t>(any_value));
-        } else if (type == typeid(uint8_t)) {
-            return py::cast(std::any_cast<uint8_t>(any_value));
-        } else if (type == typeid(int16_t)) {
-            return py::cast(std::any_cast<int16_t>(any_value));
-        } else if (type == typeid(uint16_t)) {
-            return py::cast(std::any_cast<uint16_t>(any_value));
-        } else if (type == typeid(int)) {
-            return py::cast(std::any_cast<int>(any_value));
-        } else if (type == typeid(uint32_t)) {
-            return py::cast(std::any_cast<uint32_t>(any_value));
         } else if (type == typeid(int64_t)) {
             return py::cast(std::any_cast<int64_t>(any_value));
-        } else if (type == typeid(uint64_t)) {
-            return py::cast(std::any_cast<uint64_t>(any_value));
         } else if (type == typeid(double)) {
             return py::cast(std::any_cast<double>(any_value));
-        } else if (type == typeid(float)) {
-            return py::cast(std::any_cast<float>(any_value));
         } else if (type == typeid(std::string)) {
             return py::cast(std::any_cast<std::string>(any_value));
         } else if (type == typeid(bool)) {
@@ -51,7 +35,7 @@ public:
         } else if (type == typeid(nlohmann::json)) {
             return py::cast(std::any_cast<nlohmann::json>(any_value));
         } else {
-            throw std::runtime_error("ScriptEngine received unsupported C++ type!");
+            throw std::runtime_error("ScriptEngine received an unsupported C++ argument type!");
         }
     }
 
