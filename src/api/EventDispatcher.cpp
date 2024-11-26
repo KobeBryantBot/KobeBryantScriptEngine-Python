@@ -13,6 +13,8 @@ ScriptEventBusImpl::ScriptEventBusImpl() {
             auto packet = ev.mPacket;
             if (packet.contains("post_type")) {
                 std::string post_type = packet["post_type"];
+                auto        baseEvent = CustomEvent(post_type, packet);
+                ScriptEventBusImpl::getInstance().publish(post_type, baseEvent);
                 switch (utils::doHash(post_type)) {
                 case utils::doHash("meta_event"): {
                     std::string meta_event_type = packet["meta_event_type"];
