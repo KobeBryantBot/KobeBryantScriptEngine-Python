@@ -34,6 +34,32 @@ public:
             return py::cast(std::any_cast<bool>(any_value));
         } else if (type == typeid(nlohmann::json)) {
             return py::cast(std::any_cast<nlohmann::json>(any_value));
+        } else if (type == typeid(std::optional<int64_t>)) {
+            return py::cast(std::any_cast<std::optional<int64_t>>(any_value));
+        } else if (type == typeid(std::optional<uint64_t>)) {
+            return py::cast(std::any_cast<std::optional<uint64_t>>(any_value));
+        } else if (type == typeid(std::optional<int>)) {
+            return py::cast(std::any_cast<std::optional<int>>(any_value));
+        } else if (type == typeid(std::optional<uint32_t>)) {
+            return py::cast(std::any_cast<std::optional<uint32_t>>(any_value));
+        } else if (type == typeid(std::optional<int16_t>)) {
+            return py::cast(std::any_cast<std::optional<int16_t>>(any_value));
+        } else if (type == typeid(std::optional<uint16_t>)) {
+            return py::cast(std::any_cast<std::optional<uint16_t>>(any_value));
+        } else if (type == typeid(std::optional<int8_t>)) {
+            return py::cast(std::any_cast<std::optional<int8_t>>(any_value));
+        } else if (type == typeid(std::optional<uint8_t>)) {
+            return py::cast(std::any_cast<std::optional<uint8_t>>(any_value));
+        } else if (type == typeid(std::optional<float>)) {
+            return py::cast(std::any_cast<std::optional<float>>(any_value));
+        } else if (type == typeid(std::optional<double>)) {
+            return py::cast(std::any_cast<std::optional<double>>(any_value));
+        } else if (type == typeid(std::optional<std::string>)) {
+            return py::cast(std::any_cast<std::optional<std::string>>(any_value));
+        } else if (type == typeid(std::optional<bool>)) {
+            return py::cast(std::any_cast<std::optional<bool>>(any_value));
+        } else if (type == typeid(std::optional<nlohmann::json>)) {
+            return py::cast(std::any_cast<std::optional<nlohmann::json>>(any_value));
         } else {
             throw std::runtime_error("ScriptEngine received an unsupported C++ argument type!");
         }
