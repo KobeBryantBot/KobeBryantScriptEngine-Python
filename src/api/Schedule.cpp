@@ -12,31 +12,31 @@ class ScriptSchedule : public Schedule {
     friend Schedule;
 
 public:
-    static size_t addDelayTask(int delay, std::function<void()> func) {
+    static size_t addDelayTask(uint64_t delay, std::function<void()> func) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             return addDelay(*plugin, std::chrono::milliseconds(delay), func);
         }
         return -1;
     }
 
-    static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately) {
+    static size_t addRepeatTask(uint64_t delay, std::function<void()> func, bool immediately) {
         if (immediately) {
             func();
         }
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-            return addRepeat(*plugin, std::chrono::seconds(delay), func);
+            return addRepeat(*plugin, std::chrono::milliseconds(delay), func);
         }
         return -1;
     }
 
-    static size_t addRepeatTask(int delay, std::function<void()> func, bool immediately, uint64_t times) {
+    static size_t addRepeatTask(uint64_t delay, std::function<void()> func, bool immediately, uint64_t times) {
         if (immediately) {
             func();
             times--;
         }
         if (times >= 1) {
             if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-                return addRepeat(*plugin, std::chrono::seconds(delay), func, times);
+                return addRepeat(*plugin, std::chrono::milliseconds(delay), func, times);
             }
         }
         return -1;
@@ -55,14 +55,14 @@ void initSchedule(py::module_& m) {
         .def_static("addDelayTask", &ScriptSchedule::addDelayTask)
         .def_static(
             "addRepeatTask",
-            py::overload_cast<int, std::function<void()>, bool>(&ScriptSchedule::addRepeatTask),
+            py::overload_cast<uint64_t, std::function<void()>, bool>(&ScriptSchedule::addRepeatTask),
             py::arg(),
             py::arg(),
             py::arg() = false
         )
         .def_static(
             "addRepeatTask",
-            py::overload_cast<int, std::function<void()>, bool, uint64_t>(&ScriptSchedule::addRepeatTask)
+            py::overload_cast<uint64_t, std::function<void()>, bool, uint64_t>(&ScriptSchedule::addRepeatTask)
         )
         .def_static("cancelTask", &ScriptSchedule::cancelTask);
 }
