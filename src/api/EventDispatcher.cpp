@@ -8,7 +8,7 @@ bool ScriptListener::operator==(const ScriptListener& rhs) const { return mId ==
 
 
 ScriptEventBusImpl::ScriptEventBusImpl() {
-    EventBus::getInstance().subscribe<PacketEvent>([](PacketEvent const& ev) {
+    EventBus::subscribe<PacketEvent>([](PacketEvent const& ev) {
         try {
             auto packet = ev.mPacket;
             if (packet.contains("post_type")) {
@@ -141,7 +141,7 @@ public:
     static void emit(std::string const& event, CustomEvent& data) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().publish(event, data);
-            EventBus::getInstance().publish(data);
+            EventBus::publish(data);
         }
     }
 };

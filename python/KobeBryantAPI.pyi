@@ -103,123 +103,134 @@ class RequestSubType(Enum):
 
 class PacketSender:
     @staticmethod
-    def getInstance() -> PacketSender: ...
     @override
-    def sendRawPacket(self, packet: str) -> None: ...
+    def sendRawPacket(packet: str) -> None: ...
+    @staticmethod
     @override
     def sendRawPacket(
-        self,
         packet: str,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     @overload
-    def sendGroupMessage(self, target: int, msg: str) -> None: ...
+    def sendGroupMessage(target: int, msg: str) -> None: ...
+    @staticmethod
     @overload
-    def sendGroupMessage(self, target: int, msg: Message) -> None: ...
+    def sendGroupMessage(target: int, msg: Message) -> None: ...
+    @staticmethod
     @overload
-    def sendPrivateMessage(self, target: int, msg: str) -> None: ...
+    def sendPrivateMessage(target: int, msg: str) -> None: ...
+    @staticmethod
     @overload
-    def sendPrivateMessage(self, target: int, msg: Message) -> None: ...
-    def sendFriendPoke(self, target: int) -> None: ...
-    def sendGroupPoke(self, group: int, target: int) -> None: ...
-    def deleteMessage(self, msgId: int) -> None: ...
-    def sendLike(self, target: int, times: int = 10) -> None: ...
-    def kickGroupMember(
-        self, group: int, target: int, reject: bool = False
-    ) -> None: ...
-    def setGroupMemberMute(
-        self, group: int, target: int, duration: int = 1800
-    ) -> None: ...
-    def setGroupGlobalMute(self, group: int, enable: bool = True) -> None: ...
-    def setGroupAdmin(self, group: int, target: int, enable: bool = True) -> None: ...
-    def setGroupCard(self, group: int, target: int, card: str) -> None: ...
-    def setGroupName(self, group: int, name: str) -> None: ...
-    def leaveGroup(self, group: int, dismiss: bool = False) -> None: ...
-    def handleFriendAddRequest(
-        self, approve: bool, flag: str, remark: str = ""
-    ) -> None: ...
+    def sendPrivateMessage(target: int, msg: Message) -> None: ...
+    @staticmethod
+    def sendFriendPoke(target: int) -> None: ...
+    @staticmethod
+    def sendGroupPoke(group: int, target: int) -> None: ...
+    @staticmethod
+    def deleteMessage(msgId: int) -> None: ...
+    @staticmethod
+    def sendLike(target: int, times: int = 10) -> None: ...
+    @staticmethod
+    def kickGroupMember(group: int, target: int, reject: bool = False) -> None: ...
+    @staticmethod
+    def setGroupMemberMute(group: int, target: int, duration: int = 1800) -> None: ...
+    @staticmethod
+    def setGroupGlobalMute(group: int, enable: bool = True) -> None: ...
+    @staticmethod
+    def setGroupAdmin(group: int, target: int, enable: bool = True) -> None: ...
+    @staticmethod
+    def setGroupCard(group: int, target: int, card: str) -> None: ...
+    @staticmethod
+    def setGroupName(group: int, name: str) -> None: ...
+    @staticmethod
+    def leaveGroup(group: int, dismiss: bool = False) -> None: ...
+    @staticmethod
+    def handleFriendAddRequest(approve: bool, flag: str, remark: str = "") -> None: ...
+    @staticmethod
     def handleGroupAddRequest(
-        self, approve: bool, type: RequestSubType, flag: str, reason: str = ""
+        approve: bool, type: RequestSubType, flag: str, reason: str = ""
     ) -> None: ...
-    def getMessage(self, messageId: int) -> None: ...
+    @staticmethod
+    def getMessage(messageId: int) -> None: ...
+    @staticmethod
     def getGroupsListInfo(
-        self,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getForwardMessage(
-        self,
         messageId: int,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getLoginInfo(
-        self,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getStrangerInfo(
-        self,
         target: int,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getFriendsListInfo(
-        self,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getFriendsList(
-        self,
         callback: Callable[[List[int]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getGroupInfo(
-        self,
         groupId: int,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getGroupMemberInfo(
-        self,
         groupId: int,
         target: int,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getGroupMembersListInfo(
-        self,
         groupId: int,
         callback: Callable[[Dict[str, Any]], None],
         timeoutCallback: Callable[[], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getGroupMembersList(
-        self,
         groupId: int,
         callback: Callable[[List[int]], None],
         timeoutCallback: Callable[[str], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def chooseRandomGroupMember(
-        self,
         groupId: int,
         callback: Callable[[int], None],
         timeoutCallback: Callable[[str], None] = None,
         timeout: int = 5,
     ) -> None: ...
+    @staticmethod
     def getGroupsList(
-        self,
         groupId: int,
         callback: Callable[[List[int]], None],
         timeoutCallback: Callable[[str], None] = None,
