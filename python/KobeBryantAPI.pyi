@@ -57,16 +57,32 @@ class Logger:
 class Schedule:
     @staticmethod
     def addDelayTask(delay: int, task: Callable[[], None]) -> int: ...
-    @overload
     @staticmethod
+    @overload
     def addRepeatTask(
         interval: int, task: Callable[[], None], immediately: bool = False
     ) -> int: ...
-    @overload
     @staticmethod
+    @overload
     def addRepeatTask(
         interval: int, task: Callable[[], None], immediately: bool, times: int
     ) -> int: ...
+    @staticmethod
+    @overload
+    def addConditionTask(
+        task: Callable[[], None], condition: Callable[[], bool]
+    ) -> int: ...
+    @staticmethod
+    @overload
+    def addConditionTask(
+        task: Callable[[], None], condition: Callable[[], bool], times: int
+    ) -> int: ...
+    @staticmethod
+    @overload
+    def addCronTask(cron: str, task: Callable[[], None]) -> int: ...
+    @staticmethod
+    @overload
+    def addCronTask(cron: str, task: Callable[[], None], times: int) -> int: ...
     @staticmethod
     def cancelTask(taskId: int) -> bool: ...
 
