@@ -2,6 +2,7 @@
     "name": "KobeBryantScriptEngine-Python",
     "entry": "KobeBryantScriptEngine-Python.dll",
     "type": "native",
+    "version": "v0.4.0",
     "preload": [
         "Python313/python313.dll"
     ]

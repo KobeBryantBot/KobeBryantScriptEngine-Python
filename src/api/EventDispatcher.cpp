@@ -8,11 +8,13 @@ bool ScriptListener::operator==(const ScriptListener& rhs) const { return mId ==
 
 
 ScriptEventBusImpl::ScriptEventBusImpl() {
-    EventBus::getInstance().subscribe<PacketEvent>([](PacketEvent const& ev) {
+    EventBus::subscribe<PacketEvent>([](PacketEvent const& ev) {
         try {
             auto packet = ev.mPacket;
             if (packet.contains("post_type")) {
                 std::string post_type = packet["post_type"];
+                auto        baseEvent = CustomEvent(post_type, packet);
+                ScriptEventBusImpl::getInstance().publish(post_type, baseEvent);
                 switch (utils::doHash(post_type)) {
                 case utils::doHash("meta_event"): {
                     std::string meta_event_type = packet["meta_event_type"];
@@ -133,13 +135,13 @@ public:
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().removePluginListener(*plugin, listener);
         }
-        return ScriptEventBusImpl::getInstance().remove(std::move(listener));
+        return ScriptEventBusImpl::getInstance().remove(listener);
     }
 
     static void emit(std::string const& event, CustomEvent& data) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             ScriptEventBusImpl::getInstance().publish(event, data);
-            EventBus::getInstance().publish(data);
+            EventBus::publish(data);
         }
     }
 };

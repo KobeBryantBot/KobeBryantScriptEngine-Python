@@ -3,17 +3,17 @@
     "meta_data": {
         "name": "KobeBryantScriptEngine-Python",
         "type": "native",
-        "version": "v0.3.3",
+        "version": "v0.4.0",
         "description": "Python Engine for KobeBryantBot Framework",
         "author": "KobeBryantBot",
         "tags": [
-            "engine"
+            "engine",
+            "python"
         ],
-        "dependence": [],
         "source": "github.com/KobeBryantBot/KobeBryantScriptEngine-Python"
     },
     "download_url": {
-        "windows-x64": "https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases/download/v0.3.2/KobeBryantScriptEngine-Python-windows-x64.zip"
+        "windows-x64": "https://github.com/KobeBryantBot/KobeBryantScriptEngine-Python/releases/download/v0.4.0/KobeBryantScriptEngine-Python-windows-x64.zip"
     },
     "on_install": {
         "place": [

@@ -52,11 +52,13 @@ void initPacket(py::module_& m) {
         .export_values();
 
     py::class_<PacketSender>(m, "PacketSender")
-        .def_static("getInstance", &PacketSender::getInstance, py::return_value_policy::reference)
-        .def("sendRawPacket", py::overload_cast<std::string const&>(&PacketSender::sendRawPacket))
-        .def("sendGroupMessage", py::overload_cast<uint64_t, std::string const&>(&PacketSender::sendGroupMessage))
-        .def("sendGroupMessage", py::overload_cast<uint64_t, Message const&>(&PacketSender::sendGroupMessage))
-        .def(
+        .def_static("sendRawPacket", py::overload_cast<std::string const&>(&PacketSender::sendRawPacket))
+        .def_static(
+            "sendGroupMessage",
+            py::overload_cast<uint64_t, std::string const&>(&PacketSender::sendGroupMessage)
+        )
+        .def_static("sendGroupMessage", py::overload_cast<uint64_t, Message const&>(&PacketSender::sendGroupMessage))
+        .def_static(
             "sendRawPacket",
             py::overload_cast<
                 std::string const&,
@@ -68,27 +70,33 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
+        .def_static(
             "sendPrivateMessage",
             py::overload_cast<PacketSender::UserId, std::string const&>(&PacketSender::sendPrivateMessage)
         )
-        .def(
+        .def_static(
             "sendPrivateMessage",
             py::overload_cast<PacketSender::UserId, Message const&>(&PacketSender::sendPrivateMessage)
         )
-        .def("sendFriendPoke", &PacketSender::sendFriendPoke)
-        .def("sendGroupPoke", &PacketSender::sendGroupPoke)
-        .def("deleteMessage", &PacketSender::deleteMessage)
-        .def("sendLike", &PacketSender::sendLike, py::arg(), py::arg() = 10)
-        .def("kickGroupMember", &PacketSender::kickGroupMember, py::arg(), py::arg(), py::arg() = false)
-        .def("setGroupMemberMute", &PacketSender::setGroupMemberMute, py::arg(), py::arg(), py::arg() = 1800)
-        .def("setGroupGlobalMute", &PacketSender::setGroupGlobalMute, py::arg(), py::arg() = true)
-        .def("setGroupAdmin", &PacketSender::setGroupAdmin, py::arg(), py::arg(), py::arg() = true)
-        .def("setGroupCard", &PacketSender::setGroupCard)
-        .def("setGroupName", &PacketSender::setGroupName)
-        .def("leaveGroup", &PacketSender::leaveGroup, py::arg(), py::arg() = false)
-        .def("handleFriendAddRequest", &PacketSender::handleFriendAddRequest, py::arg(), py::arg(), py::arg() = "")
-        .def(
+        .def_static("sendFriendPoke", &PacketSender::sendFriendPoke)
+        .def_static("sendGroupPoke", &PacketSender::sendGroupPoke)
+        .def_static("deleteMessage", &PacketSender::deleteMessage)
+        .def_static("sendLike", &PacketSender::sendLike, py::arg(), py::arg() = 10)
+        .def_static("kickGroupMember", &PacketSender::kickGroupMember, py::arg(), py::arg(), py::arg() = false)
+        .def_static("setGroupMemberMute", &PacketSender::setGroupMemberMute, py::arg(), py::arg(), py::arg() = 1800)
+        .def_static("setGroupGlobalMute", &PacketSender::setGroupGlobalMute, py::arg(), py::arg() = true)
+        .def_static("setGroupAdmin", &PacketSender::setGroupAdmin, py::arg(), py::arg(), py::arg() = true)
+        .def_static("setGroupCard", &PacketSender::setGroupCard)
+        .def_static("setGroupName", &PacketSender::setGroupName)
+        .def_static("leaveGroup", &PacketSender::leaveGroup, py::arg(), py::arg() = false)
+        .def_static(
+            "handleFriendAddRequest",
+            &PacketSender::handleFriendAddRequest,
+            py::arg(),
+            py::arg(),
+            py::arg() = ""
+        )
+        .def_static(
             "handleGroupAddRequest",
             &PacketSender::handleGroupAddRequest,
             py::arg(),
@@ -96,9 +104,15 @@ void initPacket(py::module_& m) {
             py::arg(),
             py::arg() = ""
         )
-        .def("getMessage", &PacketSender::getMessage, py::arg(), py::arg(), py::arg() = nullptr, py::arg() = 5)
-        .def("getGroupsListInfo", &PacketSender::getGroupsListInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
-        .def(
+        .def_static("getMessage", &PacketSender::getMessage, py::arg(), py::arg(), py::arg() = nullptr, py::arg() = 5)
+        .def_static(
+            "getGroupsListInfo",
+            &PacketSender::getGroupsListInfo,
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
+        )
+        .def_static(
             "getForwardMessage",
             &PacketSender::getForwardMessage,
             py::arg(),
@@ -106,8 +120,8 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def("getLoginInfo", &PacketSender::getLoginInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
-        .def(
+        .def_static("getLoginInfo", &PacketSender::getLoginInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
+        .def_static(
             "getStrangerInfo",
             py::overload_cast<uint64_t, std::function<void(nlohmann::json const&)>, std::function<void()>, uint64_t>(
                 &PacketSender::getStrangerInfo
@@ -117,9 +131,15 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def("getFriendsListInfo", &PacketSender::getFriendsListInfo, py::arg(), py::arg() = nullptr, py::arg() = 5)
-        .def("getFriendsList", &PacketSender::getFriendsList)
-        .def(
+        .def_static(
+            "getFriendsListInfo",
+            &PacketSender::getFriendsListInfo,
+            py::arg(),
+            py::arg() = nullptr,
+            py::arg() = 5
+        )
+        .def_static("getFriendsList", &PacketSender::getFriendsList)
+        .def_static(
             "getGroupInfo",
             py::overload_cast<uint64_t, std::function<void(nlohmann::json const&)>, std::function<void()>, uint64_t>(
                 &PacketSender::getGroupInfo
@@ -129,7 +149,7 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
+        .def_static(
             "getGroupMemberInfo",
             py::overload_cast<
                 uint64_t,
@@ -143,7 +163,7 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
+        .def_static(
             "getGroupMembersListInfo",
             &PacketSender::getGroupMembersListInfo,
             py::arg(),
@@ -151,7 +171,7 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
+        .def_static(
             "getGroupMembersList",
             &PacketSender::getGroupMembersList,
             py::arg(),
@@ -159,7 +179,7 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def(
+        .def_static(
             "chooseRandomGroupMember",
             &PacketSender::chooseRandomGroupMember,
             py::arg(),
@@ -167,5 +187,5 @@ void initPacket(py::module_& m) {
             py::arg() = nullptr,
             py::arg() = 5
         )
-        .def("getGroupsList", &PacketSender::getGroupsList, py::arg(), py::arg() = nullptr, py::arg() = 5);
+        .def_static("getGroupsList", &PacketSender::getGroupsList, py::arg(), py::arg() = nullptr, py::arg() = 5);
 }

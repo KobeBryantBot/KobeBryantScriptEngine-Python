@@ -7,6 +7,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11_json/pybind11_json.hpp>
 #include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
@@ -16,43 +17,55 @@ namespace py = pybind11;
 class ScriptService : public Service {
     friend Service;
 
+    using ScriptType = std::variant<std::monostate, int64_t, double, std::string, bool, nlohmann::json>;
+
 public:
     static py::object any_to_py(std::any const& any_value) {
         auto& type = any_value.type();
-        if (type == typeid(ScriptType)) {
-            return py::cast(std::any_cast<ScriptType>(any_value));
-        } else if (type == typeid(void) || type == typeid(std::nullptr_t)) {
+        if (type == typeid(void) || type == typeid(std::nullptr_t)) {
             return py::none();
-        } else if (type == typeid(int8_t)) {
-            return py::cast(std::any_cast<int8_t>(any_value));
-        } else if (type == typeid(uint8_t)) {
-            return py::cast(std::any_cast<uint8_t>(any_value));
-        } else if (type == typeid(int16_t)) {
-            return py::cast(std::any_cast<int16_t>(any_value));
-        } else if (type == typeid(uint16_t)) {
-            return py::cast(std::any_cast<uint16_t>(any_value));
-        } else if (type == typeid(int)) {
-            return py::cast(std::any_cast<int>(any_value));
-        } else if (type == typeid(uint32_t)) {
-            return py::cast(std::any_cast<uint32_t>(any_value));
         } else if (type == typeid(int64_t)) {
             return py::cast(std::any_cast<int64_t>(any_value));
-        } else if (type == typeid(uint64_t)) {
-            return py::cast(std::any_cast<uint64_t>(any_value));
         } else if (type == typeid(double)) {
             return py::cast(std::any_cast<double>(any_value));
-        } else if (type == typeid(float)) {
-            return py::cast(std::any_cast<float>(any_value));
         } else if (type == typeid(std::string)) {
             return py::cast(std::any_cast<std::string>(any_value));
         } else if (type == typeid(bool)) {
             return py::cast(std::any_cast<bool>(any_value));
+        } else if (type == typeid(nlohmann::json)) {
+            return py::cast(std::any_cast<nlohmann::json>(any_value));
+        } else if (type == typeid(std::optional<int64_t>)) {
+            return py::cast(std::any_cast<std::optional<int64_t>>(any_value));
+        } else if (type == typeid(std::optional<uint64_t>)) {
+            return py::cast(std::any_cast<std::optional<uint64_t>>(any_value));
+        } else if (type == typeid(std::optional<int>)) {
+            return py::cast(std::any_cast<std::optional<int>>(any_value));
+        } else if (type == typeid(std::optional<uint32_t>)) {
+            return py::cast(std::any_cast<std::optional<uint32_t>>(any_value));
+        } else if (type == typeid(std::optional<int16_t>)) {
+            return py::cast(std::any_cast<std::optional<int16_t>>(any_value));
+        } else if (type == typeid(std::optional<uint16_t>)) {
+            return py::cast(std::any_cast<std::optional<uint16_t>>(any_value));
+        } else if (type == typeid(std::optional<int8_t>)) {
+            return py::cast(std::any_cast<std::optional<int8_t>>(any_value));
+        } else if (type == typeid(std::optional<uint8_t>)) {
+            return py::cast(std::any_cast<std::optional<uint8_t>>(any_value));
+        } else if (type == typeid(std::optional<float>)) {
+            return py::cast(std::any_cast<std::optional<float>>(any_value));
+        } else if (type == typeid(std::optional<double>)) {
+            return py::cast(std::any_cast<std::optional<double>>(any_value));
+        } else if (type == typeid(std::optional<std::string>)) {
+            return py::cast(std::any_cast<std::optional<std::string>>(any_value));
+        } else if (type == typeid(std::optional<bool>)) {
+            return py::cast(std::any_cast<std::optional<bool>>(any_value));
+        } else if (type == typeid(std::optional<nlohmann::json>)) {
+            return py::cast(std::any_cast<std::optional<nlohmann::json>>(any_value));
         } else {
-            throw std::runtime_error("Unsupported C++ type in function result");
+            throw std::runtime_error("ScriptEngine received an unsupported C++ argument type!");
         }
     }
 
-    static std::any variant_to_any(Service::ScriptType const& var) {
+    static std::any variant_to_any(ScriptType const& var) {
         if (std::holds_alternative<int64_t>(var)) {
             return std::any(std::get<int64_t>(var));
         } else if (std::holds_alternative<double>(var)) {
@@ -61,10 +74,8 @@ public:
             return std::any(std::get<std::string>(var));
         } else if (std::holds_alternative<bool>(var)) {
             return std::any(std::get<bool>(var));
-        } else if (std::holds_alternative<std::vector<Service::ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::vector<Service::ScriptTypeBase>>(var));
-        } else if (std::holds_alternative<std::unordered_map<std::string, Service::ScriptTypeBase>>(var)) {
-            return std::any(std::get<std::unordered_map<std::string, Service::ScriptTypeBase>>(var));
+        } else if (std::holds_alternative<nlohmann::json>(var)) {
+            return std::any(std::get<nlohmann::json>(var));
         } else {
             return std::any();
         }
@@ -82,10 +93,10 @@ public:
             auto func = [py_func](std::vector<std::any> const& args) -> std::any {
                 py::tuple args_tuple(args.size());
                 for (size_t i = 0; i < args.size(); ++i) {
-                    args_tuple[i] = py::cast(cast_type<ScriptType>(args[i]));
+                    args_tuple[i] = any_to_py(args[i]);
                 }
                 py::object result = py_func(*args_tuple);
-                return std::any(py::cast<ScriptType>(result));
+                return variant_to_any(py::cast<ScriptType>(result));
             };
             return exportAnyFunc(*plugin, funcName, func);
         }
@@ -96,24 +107,11 @@ public:
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
             auto func = importAnyFunc(pluginName, funcName);
             return py::cpp_function([func](py::args args) -> py::object {
-                std::any result;
-                try {
-                    std::vector<std::any> cxx_args;
-                    for (auto& arg : args) {
-                        cxx_args.push_back(std::any(py::cast<ScriptType>(arg)));
-                    }
-                    result = func(cxx_args);
-                } catch (std::exception const& e) {
-                    try {
-                        std::vector<std::any> cxx_args;
-                        for (auto& arg : args) {
-                            cxx_args.push_back(variant_to_any(py::cast<ScriptType>(arg)));
-                        }
-                        result = func(cxx_args);
-                    } catch (...) {
-                        throw std::runtime_error(e.what());
-                    }
+                std::vector<std::any> cxx_args;
+                for (auto& arg : args) {
+                    cxx_args.push_back(variant_to_any(py::cast<ScriptType>(arg)));
                 }
+                auto result = func(cxx_args);
                 return any_to_py(result);
             });
         }

@@ -196,8 +196,9 @@ std::optional<std::string> PythonPluginEngine::getCallingPlugin() {
         py::object         frame      = frame_info.attr("frame");
         py::object         filename   = frame.attr("f_code").attr("co_filename");
         std::string        pluginName = py::str(filename);
-        static std::string parentPath = std::filesystem::absolute("./plugins/").string();
+        static std::string parentPath = std::filesystem::absolute(".\\plugins").string();
         utils::ReplaceStr(pluginName, parentPath, "");
+        pluginName.erase(0, 1);
         auto pos = pluginName.find("/");
         if (pos == std::string::npos) {
             pos = pluginName.find("\\");
