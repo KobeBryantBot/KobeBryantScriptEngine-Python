@@ -1,11 +1,12 @@
 #include "api/Schedule.hpp"
 #include "../core/PythonPluginEngine.hpp"
-#include <croncpp/croncpp.h>
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
 #include <pybind11/embed.h>
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
+
+#pragma warning(disable : 4245)
 
 namespace py = pybind11;
 
@@ -50,7 +51,7 @@ public:
 
     static inline TaskID addCronTask(const std::string& cron, Task&& task) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-            cron::make_cron(cron);
+            // chack valid?
             return addCron(*plugin, cron, std::move(task));
         }
         return -1;
@@ -58,7 +59,7 @@ public:
 
     static inline TaskID addCronTask(const std::string& cron, Task&& task, size_t times) {
         if (auto plugin = PythonPluginEngine::getCallingPlugin()) {
-            cron::make_cron(cron);
+            // chack valid?
             return addCron(*plugin, cron, std::move(task), times);
         }
         return -1;
